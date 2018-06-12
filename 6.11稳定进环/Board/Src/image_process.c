@@ -64,18 +64,6 @@ void image_process(void)
     Road_Status_Flag = Cross;
   }
   Island_process();
-//  if(Island_Flag_Lock == Left_Island)
-//  {
-//    LED1 = 0;
-//  }
-//  else
-//    LED1 = 1;
-//  if(Island_Flag_Lock == Right_Island)
-//  {
-//    LED2 = 0;
-//  }
-//  else
-//    LED2 = 1;
   
     Slow_Flag=0;
     if(Island.State!=NoIsland&&Island.State!=Wait_Next)
@@ -679,8 +667,8 @@ u8 Out_Island(void)
     }
     else
     {
-      get_black_line(Image_fire[(Start_Point+Start_Point)/2],(Start_Point+Start_Point)/2);//行数瞎给的
-      CenterlineToDiff(Image_hang.hang_use);
+      get_black_line(Image_fire[(Start_Point+Near_Point)/2],(Start_Point+Near_Point)/2);//行数瞎给的
+      CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
     }
   }
   else if(Island.State==Left_Island_out)
@@ -692,8 +680,8 @@ u8 Out_Island(void)
     }
     else
     {
-      get_black_line(Image_fire[(Start_Point+Start_Point)/2],(Start_Point+Start_Point)/2);//行数瞎给的
-      CenterlineToDiff(Image_hang.hang_use);
+      get_black_line(Image_fire[(Start_Point+Near_Point)/2],(Start_Point+Near_Point)/2);//行数瞎给的
+      CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
     }
   }
   return 0;

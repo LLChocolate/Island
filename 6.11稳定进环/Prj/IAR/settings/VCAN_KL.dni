@@ -1,5 +1,5 @@
 [DebugChecksum]
-Checksum=-1674903115
+Checksum=1331927928
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -91,16 +91,10 @@ mode=0
 Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\4.17}.47.9" 0 0 1 "" 0 "" 0
 Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\4.11(2)\4.12}.379.9" 0 0 1 "" 0 "" 0
 Bp2=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\App}.744.3" 0 0 1 "" 0 "" 0
-Bp3=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.759.3" 0 0 1 "" 0 "" 0
-Bp4=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\..\4.28(3)}.362.5" 0 0 1 "" 0 "" 0
-Bp5=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.759.3" 0 0 1 "" 0 "" 0
-Bp6=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.759.3" 0 0 1 "" 0 "" 0
-Bp7=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.759.3" 0 0 1 "" 0 "" 0
-Bp8=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.759.3" 0 0 1 "" 0 "" 0
-Bp9=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.256.5" 0 0 1 "" 0 "" 0
-Bp10=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.80.5" 0 0 1 "" 0 "" 0
-Bp11=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.782.3" 0 0 1 "" 0 "" 0
-Count=12
+Bp3=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\..\4.28(3)}.362.5" 0 0 1 "" 0 "" 0
+Bp4=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.246.3" 0 0 1 "" 0 "" 0
+Bp5=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\Board\Src\image_process.c}.73.10" 0 0 1 "" 0 "" 0
+Count=6
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
