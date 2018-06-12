@@ -393,8 +393,6 @@ u8 Elec_Island(void)
   if(Island.State == NoIsland)//无环岛时检测环岛
   {
     doublt_island = Image_Island_Test();
-    
-    
     if(doublt_island!=0&&double_AD()==1)
     {
       Island.State = doublt_island;
@@ -444,7 +442,6 @@ u8 In_Island(void)
     }
     else
     {
-      Island.In2Stay_cnt = 0;//清零
       if(Island.State==Left_Island_pre)
       {
         if(center>Image_lie.Three_Lie[1]+30)//突变点太靠右
@@ -462,6 +459,7 @@ u8 In_Island(void)
         }
         else
         {
+          Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 10;//布线（三角形相似）
           Island.In_Center = center_use;//保存上一次的中心点
           CenterlineToDiff(center_use);
@@ -484,6 +482,7 @@ u8 In_Island(void)
         }
         else
         {
+          Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 0)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 319)/2 - 10;
           Island.In_Center = center_use;//保存上一次的中心点
           CenterlineToDiff(center_use);
