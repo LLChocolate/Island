@@ -618,6 +618,7 @@ u8 Stay_Island(void)
   static u8  center_Period = 0;
   static u16 Center_[Island_Center_Period_Const];
   
+  
   if(Island.State!=Left_Island_in&&Island.State!=Right_Island_in)
     return 1;
   
@@ -629,9 +630,10 @@ u8 Stay_Island(void)
   {
     get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
   }
-  if( (Image_hang.center[Image_hang.hang_use]<Image_lie.Three_Lie[1]-20&&Island.State==Left_Island_in)//中心点范围正确
-    ||(Image_hang.center[Image_hang.hang_use]>Image_lie.Three_Lie[1]+20&&Island.State==Right_Island_in))
+  if( (Image_hang.center[Image_hang.hang_use]<160&&Island.State==Left_Island_in)//中心点范围正确
+    ||(Image_hang.center[Image_hang.hang_use]>160&&Island.State==Right_Island_in))
   {
+    Island.Stay2Out_cnt = 0;
     CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
   //记录左右速度目标值用来出环岛
 
@@ -645,8 +647,9 @@ u8 Stay_Island(void)
   }
   else//不正确的话拐一个固定值，状态更新
   {
+    Island.Stay2Out_cnt ++;
     CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
-    if(Island.Out_Allow_flag==1)
+    if(Island.Out_Allow_flag==1&&Island.Stay2Out_cnt>2)//允许改变状态且连续三次中心点不正确
     {
       Island.Out_Allow_flag = 0;
       if(Island.State==Left_Island_in)

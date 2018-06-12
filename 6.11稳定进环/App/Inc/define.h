@@ -215,6 +215,8 @@ typedef struct
   u16 Stay2Out_flag_delay_const;
   u8  Out_Allow_flag;
   
+  u8  Stay2Out_cnt;
+  
   u8  Next_Island_flag;         //和下一个环岛之间的时间间隔
   u16 Next_Island_flag_delay;
   u16 Next_Island_flag_delay_const;
