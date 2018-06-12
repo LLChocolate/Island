@@ -129,7 +129,6 @@ void image_process(void)
 
 }
 
-//
 u8 get_black_line(unsigned char *ImageData_in,int hang)//捕捉黑线  
 {
   int Middle=160;  //黑线中间默认为CENNTER
@@ -309,8 +308,6 @@ void get_three_lie(void)
 }
 
 
-
-
 u8 CenterlineToDiff(int center)
 {
   static u8  center_period = 0;
@@ -354,15 +351,12 @@ u8 Cross_Test(void)
 
 u8 double_AD(void)
 {
-//  if((L_AD_Ave>stand_AD_L*1.8)&&(R_AD_Ave>stand_AD_R*1.8))
   if((L_AD_Ave>3000)||(R_AD_Ave>3000))
   {
-//    BEEP = 1;
     return 1;
   }
   else 
   {
-//    BEEP = 0;
     return 0;
   }
 }
@@ -398,7 +392,6 @@ u8 Elec_Island(void)
       Island.Next_Island_flag = 1;
       Island.Next_Island_flag_delay = Island.Next_Island_flag_delay_const;
     }
-      
   }
   return 0;
 }
@@ -513,7 +506,6 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
   {
     if(Middle<120)return -1;//前方直道已经看不到了
   }
-  
   
   for(i=0;i<20;i++)//20行
   {
@@ -669,13 +661,23 @@ u8 Out_Island(void)
         center_Period = 0;
     
       Island.Stay_Center  -= Center_[center_Period];
-      Center_[center_Period] = Image_hang.center[Image_hang.hang_use];
+      Center_[center_Period] = center_use;
       Island.Stay_Center  += Center_[center_Period];
       center_Period++;  
+//调试用，显示中心点
+      if(LCD_DISPLAY_FLAG==1)
+      {
+        LCD_DrawBigPoint(center_use,Start_Point,Cyan);//行列颠倒
+      }
     }
     else//补线失败，使用之前保存的中心点
     {
       CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+//调试用，显示中心点
+      if(LCD_DISPLAY_FLAG==1)
+      {
+        LCD_DrawBigPoint(Island.Stay_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
+      }
     }
   }
   else if(Island.State==Left_Island_out)
@@ -688,13 +690,23 @@ u8 Out_Island(void)
         center_Period = 0;
     
       Island.Stay_Center  -= Center_[center_Period];
-      Center_[center_Period] = Image_hang.center[Image_hang.hang_use];
+      Center_[center_Period] = center_use;
       Island.Stay_Center  += Center_[center_Period];
       center_Period++;  
+//调试用，显示中心点
+      if(LCD_DISPLAY_FLAG==1)
+      {
+        LCD_DrawBigPoint(center_use,Start_Point,Cyan);//行列颠倒
+      }
     }
     else//补线失败，使用之前保存的中心点
     {
       CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+//调试用，显示中心点
+      if(LCD_DISPLAY_FLAG==1)
+      {
+        LCD_DrawBigPoint(Island.Stay_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
+      }
     }
   }
   return 0;
