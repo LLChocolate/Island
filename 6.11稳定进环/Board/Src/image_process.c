@@ -44,7 +44,8 @@ Image_lieData  Image_lie={{78,158,238},{0}};
 Island_Data    Island={
                   .Correct_hang = 150,
                   .Image_Start_hang = 83,
-                  .Next_Island_flag_delay_const = 1000
+                  .Next_Island_flag_delay_const = 1000,
+                  .Stay2Out_flag_delay_const = 800
                     };
 void image_process(void)
 {
@@ -421,10 +422,14 @@ u8 In_Island(void)
         if(Island.State==Left_Island_pre)
         {
           Island.State = Left_Island_in;
+          Island.Stay2Out_flag = 1;
+          Island.Stay2Out_flag_delay = Island.Stay2Out_flag_delay_const;
         }
         else if(Island.State==Right_Island_pre)
         {
           Island.State = Right_Island_in;
+          Island.Stay2Out_flag = 1;
+          Island.Stay2Out_flag_delay = Island.Stay2Out_flag_delay_const;
         }
       }
     }
@@ -442,16 +447,15 @@ u8 In_Island(void)
           {
             get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
           }
-          CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
-          Island.In_Center = center_use;//保存上一次的中心点
+          center_use = Image_hang.center[Image_hang.hang_use];
         }
         else
         {
           Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 10;//布线（三角形相似）
-          Island.In_Center = center_use;//保存上一次的中心点
-          CenterlineToDiff(center_use);
         }
+        Island.In_Center = center_use;//保存上一次的中心点
+        CenterlineToDiff(center_use);
       }
       else if(Island.State==Right_Island_pre)
       {
@@ -465,16 +469,15 @@ u8 In_Island(void)
           {
             get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
           }
-          CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
-          Island.In_Center = center_use;//保存上一次的中心点
+          center_use = Image_hang.center[Image_hang.hang_use];
         }
         else
         {
           Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 0)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 319)/2 - 10;
-          Island.In_Center = center_use;//保存上一次的中心点
-          CenterlineToDiff(center_use);
         }
+        Island.In_Center = center_use;//保存上一次的中心点
+        CenterlineToDiff(center_use);
       }
       //调试用，显示中心点
       if(LCD_DISPLAY_FLAG==1)
@@ -626,8 +629,8 @@ u8 Stay_Island(void)
   {
     get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
   }
-  if( (Image_hang.center[Image_hang.hang_use]<120&&Island.State==Left_Island_in)//中心点范围正确
-    ||(Image_hang.center[Image_hang.hang_use]>200&&Island.State==Right_Island_in))
+  if( (Image_hang.center[Image_hang.hang_use]<Image_lie.Three_Lie[1]-20&&Island.State==Left_Island_in)//中心点范围正确
+    ||(Image_hang.center[Image_hang.hang_use]>Image_lie.Three_Lie[1]+20&&Island.State==Right_Island_in))
   {
     CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
   //记录左右速度目标值用来出环岛
@@ -643,10 +646,14 @@ u8 Stay_Island(void)
   else//不正确的话拐一个固定值，状态更新
   {
     CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
-    if(Island.State==Left_Island_in)
-      Island.State = Left_Island_out;
-    else if(Island.State==Right_Island_in)
-      Island.State = Right_Island_out;
+    if(Island.Out_Allow_flag==1)
+    {
+      Island.Out_Allow_flag = 0;
+      if(Island.State==Left_Island_in)
+        Island.State = Left_Island_out;
+      else if(Island.State==Right_Island_in)
+        Island.State = Right_Island_out;
+    }
   }
   return 0;
 }

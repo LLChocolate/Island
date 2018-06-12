@@ -210,6 +210,11 @@ typedef struct
   
   int Stay_Center;//用作出环岛的标准
   
+  u8  Stay2Out_flag;
+  u16 Stay2Out_flag_delay;
+  u16 Stay2Out_flag_delay_const;
+  u8  Out_Allow_flag;
+  
   u8  Next_Island_flag;         //和下一个环岛之间的时间间隔
   u16 Next_Island_flag_delay;
   u16 Next_Island_flag_delay_const;
