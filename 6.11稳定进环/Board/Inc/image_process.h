@@ -52,5 +52,6 @@ u8 Out_Island(void);
 u8 Image_Island_Test(void);
 int Test_Far_Lie(void);
 int Out_Island_Test(int* start_end, int* end_end);
+int Stay2Out_test();
 
 #endif

@@ -65,7 +65,7 @@ void image_process(void)
     Road_Status_Flag = Cross;
   }
   Island_process();
-  
+//  Out_Island();
     Slow_Flag=0;
     if(Island.State!=NoIsland&&Island.State!=Wait_Next)
     {
@@ -615,10 +615,6 @@ int In_Island_center(u8* hang)//Èë»·µºÊ±Ñ°ÕÒÍ»±äµã+²¹Ïß
 #define Island_Center_Period_Const  (10)
 u8 Stay_Island(void)
 {
-  static u8  center_Period = 0;
-  static u16 Center_[Island_Center_Period_Const];
-  
-  
   if(Island.State!=Left_Island_in&&Island.State!=Right_Island_in)
     return 1;
   
@@ -630,34 +626,23 @@ u8 Stay_Island(void)
   {
     get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
   }
-  if( (Image_hang.center[Image_hang.hang_use]<160&&Island.State==Left_Island_in)//ÖĞĞÄµã·¶Î§ÕıÈ·
-    ||(Image_hang.center[Image_hang.hang_use]>160&&Island.State==Right_Island_in))
+  CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+  
+  if(Island.Out_Allow_flag==1)//ÔÊĞí¸Ä±ä×´Ì¬
   {
-    Island.Stay2Out_cnt = 0;
-    CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
-  //¼ÇÂ¼×óÓÒËÙ¶ÈÄ¿±êÖµÓÃÀ´³ö»·µº
-
-    if(center_Period > (Island_Center_Period_Const - 1))
-      center_Period = 0;
-    
-    Island.Stay_Center  -= Center_[center_Period];
-    Center_[center_Period] = Image_hang.center[Image_hang.hang_use];
-    Island.Stay_Center  += Center_[center_Period];
-    center_Period++;  
-  }
-  else//²»ÕıÈ·µÄ»°¹ÕÒ»¸ö¹Ì¶¨Öµ£¬×´Ì¬¸üĞÂ
-  {
-    Island.Stay2Out_cnt ++;
-    CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
-    if(Island.Out_Allow_flag==1&&Island.Stay2Out_cnt>2)//ÔÊĞí¸Ä±ä×´Ì¬ÇÒÁ¬ĞøÈı´ÎÖĞĞÄµã²»ÕıÈ·
+    if(Stay2Out_test()==1)
+      Island.Stay2Out_cnt ++;
+    else 
+      Island.Stay2Out_cnt = 0;
+    if(Island.Stay2Out_cnt>2)//Á¬ĞøÈı´Î²âµ½Í»±äµã×´Ì¬¸Ä±ä
     {
-      Island.Out_Allow_flag = 0;
       if(Island.State==Left_Island_in)
         Island.State = Left_Island_out;
       else if(Island.State==Right_Island_in)
         Island.State = Right_Island_out;
     }
   }
+
   return 0;
 }
 
@@ -666,32 +651,50 @@ u8 Out_Island(void)
   int Start_End, End_End;
   int center_impulse;//´æ´¢Í»±äµãÁĞÊı
   int center_use;
+  static u8  center_Period = 0;
+  static u16 Center_[Island_Center_Period_Const];
+  
   //¼ì²â³ö»·µº±êÖ¾
+  if(Island.State!=Right_Island_out&&Island.State!=Left_Island_out)
+    return 1;
+  
   center_impulse = Out_Island_Test(&Start_End,&End_End);
   if(Island.State==Right_Island_out)//²¹Ïß
   {
-    center_use = ((center_impulse - (center_impulse - 20)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 319)/2;
+    center_use = ((center_impulse - (center_impulse - 0)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 319)/2;
     if(center_use>Image_lie.Three_Lie[1]+30)//ÓĞĞ§ĞÔ¼ìÑé
     {
       CenterlineToDiff(center_use);
+      if(center_Period > (Island_Center_Period_Const - 1))
+        center_Period = 0;
+    
+      Island.Stay_Center  -= Center_[center_Period];
+      Center_[center_Period] = Image_hang.center[Image_hang.hang_use];
+      Island.Stay_Center  += Center_[center_Period];
+      center_Period++;  
     }
-    else
+    else//²¹ÏßÊ§°Ü£¬Ê¹ÓÃÖ®Ç°±£´æµÄÖĞĞÄµã
     {
-      get_black_line(Image_fire[(Start_Point+Near_Point)/2],(Start_Point+Near_Point)/2);//ĞĞÊıÏ¹¸øµÄ
-      CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+      CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
     }
   }
   else if(Island.State==Left_Island_out)
   {
-    center_use = ((center_impulse - (center_impulse - 300)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 0)/2;
+    center_use = ((center_impulse - (center_impulse - 319)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 0)/2;
     if(center_use<Image_lie.Three_Lie[1]-30)//ÓĞĞ§ĞÔ¼ìÑé
     {
       CenterlineToDiff(center_use);
+      if(center_Period > (Island_Center_Period_Const - 1))
+        center_Period = 0;
+    
+      Island.Stay_Center  -= Center_[center_Period];
+      Center_[center_Period] = Image_hang.center[Image_hang.hang_use];
+      Island.Stay_Center  += Center_[center_Period];
+      center_Period++;  
     }
-    else
+    else//²¹ÏßÊ§°Ü£¬Ê¹ÓÃÖ®Ç°±£´æµÄÖĞĞÄµã
     {
-      get_black_line(Image_fire[(Start_Point+Near_Point)/2],(Start_Point+Near_Point)/2);//ĞĞÊıÏ¹¸øµÄ
-      CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+      CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
     }
   }
   return 0;
@@ -804,9 +807,9 @@ int Test_Far_Lie(void)//ÔÚÈë»·µºÊ±ÕÒ×îÔ¶µãËùÔÚµÄÁĞ£¬´Ó´ËÁĞ¿ªÊ¼ÏòÁ½±ßÑ°ÕÒÍ»±äµã
 
 int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊıÁĞµÄÖÕµãºÍÄ©Î²ÁĞµÄÖÕµã
 {
-  u8 Far_Lie[20];
-  int Diff_Far_Lie[19];//Ò»½×²î·Ö
-  int DDiff_Far_Lie[18];//¶ş½×²î·Ö
+  u8 Far_Lie[25];
+  int Diff_Far_Lie[24];//Ò»½×²î·Ö
+  int DDiff_Far_Lie[23];//¶ş½×²î·Ö
   int Liner_cnt  = 0;
   int out_center = 160;
   
@@ -814,39 +817,81 @@ int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊıÁĞµÄÖÕµãºÍÄ©Î²ÁĞµÄÖÕµ
   u8 i;
   if(Island.State==Right_Island_out)
   {
-    for(i=0;i<20;i++)
+    for(i=0;i<25;i++)
     {
-      Temp_point=120;
-      while(!(Image_Point(Temp_point,20+i*4)==1
-            &&Image_Point(Temp_point-1,20+i*4)==1
-              &&Image_Point(Temp_point-2,20+i*4)==1)&&Temp_point>=10)
+      Temp_point=220;
+      while(!(Image_Point(Temp_point,0+i*4)==1
+            &&Image_Point(Temp_point-1,0+i*4)==1
+              &&Image_Point(Temp_point-2,0+i*4)==1)&&Temp_point>=10)
       Temp_point--;
       Far_Lie[i] = Temp_point;
     }
-    for(i=0;i<19;i++)
+    for(i=0;i<24;i++)
     {
       Diff_Far_Lie[i] = Far_Lie[i+1] - Far_Lie[i];
     }
-    for(i=0;i<18;i++)
+    for(i=0;i<23;i++)
     {
       DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
       if(Abs_(DDiff_Far_Lie[i])<3)//ÏßĞÔ±êÖ¾
         Liner_cnt++;
-      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2))//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
+      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2)&&Liner_cnt>1)//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
       {
         break;
       }
     }
-    out_center = 20+4*i;//¼ÇÂ¼Í»±äµã
+    out_center = 4*i;//¼ÇÂ¼Í»±äµã
   }
   else if(Island.State==Left_Island_out)
+  {
+    for(i=0;i<25;i++)
+    {
+      Temp_point=220;
+      while(!(Image_Point(Temp_point,319-i*4)==1
+            &&Image_Point(Temp_point-1,319-i*4)==1
+              &&Image_Point(Temp_point-2,319-i*4)==1)&&Temp_point>=10)
+      Temp_point--;
+      Far_Lie[i] = Temp_point;
+    }
+    for(i=0;i<24;i++)
+    {
+      Diff_Far_Lie[i] = Far_Lie[i+1] - Far_Lie[i];
+    }
+    for(i=0;i<23;i++)
+    {
+      DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
+      if(Abs_(DDiff_Far_Lie[i])<3)//ÏßĞÔ±êÖ¾
+        Liner_cnt++;
+      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2)&&Liner_cnt>1)//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
+      {
+        break;
+      }
+    }
+    out_center = 319-4*i;//¼ÇÂ¼Í»±äµã
+  }
+  *start_end = Far_Lie[0];
+  *end_end   = Far_Lie[i];
+  return out_center;
+}
+
+int Stay2Out_test()
+{
+  u8 Far_Lie[20];
+  int Diff_Far_Lie[19];//Ò»½×²î·Ö
+  int DDiff_Far_Lie[18];//¶ş½×²î·Ö
+  int Liner_cnt  = 0;
+  u8 Impulse_flag = 0;
+  
+  u8 Temp_point;
+  u8 i;
+  if(Island.State==Right_Island_in)
   {
     for(i=0;i<20;i++)
     {
       Temp_point=180;
-      while(!(Image_Point(Temp_point,300-i*4)==1
-            &&Image_Point(Temp_point-1,300-i*4)==1
-              &&Image_Point(Temp_point-2,300-i*4)==1)&&Temp_point>=10)
+      while(!(Image_Point(Temp_point,30+i*4)==1
+            &&Image_Point(Temp_point-1,30+i*4)==1
+              &&Image_Point(Temp_point-2,30+i*4)==1)&&Temp_point>=10)
       Temp_point--;
       Far_Lie[i] = Temp_point;
     }
@@ -859,14 +904,39 @@ int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊıÁĞµÄÖÕµãºÍÄ©Î²ÁĞµÄÖÕµ
       DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
       if(Abs_(DDiff_Far_Lie[i])<3)//ÏßĞÔ±êÖ¾
         Liner_cnt++;
-      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2))//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
+      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2)&&Liner_cnt>1)//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
       {
+        Impulse_flag = 1;
         break;
       }
     }
-    out_center = 300-4*i;//¼ÇÂ¼Í»±äµã
   }
-  *start_end = Far_Lie[0];
-  *end_end   = Far_Lie[i];
-  return 0;
+  else if(Island.State==Left_Island_in)
+  {
+    for(i=0;i<20;i++)
+    {
+      Temp_point=180;
+      while(!(Image_Point(Temp_point,289-i*4)==1
+            &&Image_Point(Temp_point-1,289-i*4)==1
+              &&Image_Point(Temp_point-2,289-i*4)==1)&&Temp_point>=10)
+      Temp_point--;
+      Far_Lie[i] = Temp_point;
+    }
+    for(i=0;i<19;i++)
+    {
+      Diff_Far_Lie[i] = Far_Lie[i+1] - Far_Lie[i];
+    }
+    for(i=0;i<18;i++)
+    {
+      DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
+      if(Abs_(DDiff_Far_Lie[i])<3)//ÏßĞÔ±êÖ¾
+        Liner_cnt++;
+      if(DDiff_Far_Lie[i]<-15&&Liner_cnt>(i-2)&&Liner_cnt>1)//Ö®Ç°ÏßĞÔ£¬³öÏÖ³å¼¤
+      {
+        Impulse_flag = 1;
+        break;
+      }
+    }
+  }
+  return Impulse_flag;
 }
