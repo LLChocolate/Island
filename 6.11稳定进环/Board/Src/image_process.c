@@ -15,21 +15,12 @@ float island_addline_k = 0;
 float Cur_error = 0;
 
 u8 diff_done_flag = 0;
-u8 Island_out_flag = 0;
-u16 Island_in_delay = 300;
-u16 Island_out_delay = 300;
-
-u8 Island_In_Flag = 0;
 
 u16 Start_line_delay = 0xffff;
 u8  Start_line_flag  = 0;
 u8  Start_line_cnt   = 0;
 
 u8  road_filter_flag = 0;
-u8  Far_correct_flag = 0;
-u8  Far_Diff = 0;
-u8  Island_Center_Lock_flag = 0;
-u8  Angel_Find_Flag = 0;
 Filter_1st_Str Center_Filter = {0.5,{0,0},{0,0}};
 //Kalman_Date Center_Filter={0,0,0,0,0,0.1,40,0,0};
 s16 fangcha_test[200]={0};
@@ -670,6 +661,22 @@ u8 Out_Island(void)
         LCD_DrawBigPoint(center_use,Start_Point,Cyan);//行列颠倒
       }
     }
+    else if((Image_lie.Three_lie_end[0]-10)>Image_lie.Three_lie_end[1]
+            ||(Image_lie.Three_lie_end[1]-10)>Image_lie.Three_lie_end[2])
+    {
+      //当作普通弯道寻找中线
+      get_black_line(Image_fire[Start_Point],Start_Point);//45cm处中心点
+      if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
+         &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
+           &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//去除光斑的影响
+      {
+        get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
+      }
+      if(Image_hang.center[Image_hang.hang_use]>160)//检验中点正确性
+        CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+      else
+        CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+    }
     else//补线失败，使用之前保存的中心点
     {
       CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
@@ -698,6 +705,22 @@ u8 Out_Island(void)
       {
         LCD_DrawBigPoint(center_use,Start_Point,Cyan);//行列颠倒
       }
+    }
+    else if((Image_lie.Three_lie_end[2]-10)>Image_lie.Three_lie_end[1]
+            ||(Image_lie.Three_lie_end[1]-10)>Image_lie.Three_lie_end[0])
+    {
+      //当作普通弯道寻找中线
+      get_black_line(Image_fire[Start_Point],Start_Point);//45cm处中心点
+      if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
+         &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
+           &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//去除光斑的影响
+      {
+        get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
+      }
+      if(Image_hang.center[Image_hang.hang_use]<160)//检验中点正确性
+        CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+      else
+        CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
     }
     else//补线失败，使用之前保存的中心点
     {
