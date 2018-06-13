@@ -644,7 +644,7 @@ u8 Out_Island(void)
   center_impulse = Out_Island_Test(&Start_End,&End_End);
   if(Island.State==Right_Island_out)//补线
   {
-    center_use = ((center_impulse - (center_impulse - 0)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 319)/2;
+    center_use = ((center_impulse - (center_impulse - 0)*(End_End - Start_Point)*1.0/(End_End - Start_End)) + 319)/2;
     if(center_use>Image_lie.Three_Lie[1]+30)//有效性检验
     {
       CenterlineToDiff(center_use);
@@ -689,7 +689,7 @@ u8 Out_Island(void)
   }
   else if(Island.State==Left_Island_out)
   {
-    center_use = ((center_impulse - (center_impulse - 319)*(End_End - Start_End)*1.0/(End_End - Start_Point)) + 0)/2;
+    center_use = ((center_impulse - (center_impulse - 319)*(End_End - Start_Point)*1.0/(End_End - Start_End)) + 0)/2;
     if(center_use<Image_lie.Three_Lie[1]-30)//有效性检验
     {
       CenterlineToDiff(center_use);
