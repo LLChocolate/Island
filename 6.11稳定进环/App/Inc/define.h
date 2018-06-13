@@ -208,7 +208,7 @@ typedef struct
   int In_Center;
   u8  In2Stay_cnt;
   
-  int Stay_Center;//用作出环岛的标准
+  int Out_Center;//用作出环岛的标准
   
   u8  Stay2Out_flag;
   u16 Stay2Out_flag_delay;

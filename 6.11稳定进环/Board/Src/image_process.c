@@ -437,6 +437,8 @@ u8 In_Island(void)
         {
           Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 10;//布线（三角形相似）
+          if(center_use<35)
+            center_use = 35;
         }
         Island.In_Center = center_use;//保存上一次的中心点
         CenterlineToDiff(center_use);
@@ -459,6 +461,8 @@ u8 In_Island(void)
         {
           Island.In2Stay_cnt = 0;//清零
           center_use = ((center - (center - 0)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 319)/2 - 10;
+          if(center_use>285)
+            center_use = 285;
         }
         Island.In_Center = center_use;//保存上一次的中心点
         CenterlineToDiff(center_use);
@@ -647,13 +651,15 @@ u8 Out_Island(void)
     center_use = ((center_impulse - (center_impulse - 0)*(End_End - Start_Point)*1.0/(End_End - Start_End)) + 319)/2;
     if(center_use>Image_lie.Three_Lie[1]+30)//有效性检验
     {
+      if(center_use > 285)
+        center_use = 285;
       CenterlineToDiff(center_use);
       if(center_Period > (Island_Center_Period_Const - 1))
         center_Period = 0;
     
-      Island.Stay_Center  -= Center_[center_Period];
+      Island.Out_Center  -= Center_[center_Period];
       Center_[center_Period] = center_use;
-      Island.Stay_Center  += Center_[center_Period];
+      Island.Out_Center  += Center_[center_Period];
       center_Period++;  
 //调试用，显示中心点
       if(LCD_DISPLAY_FLAG==1)
@@ -675,15 +681,15 @@ u8 Out_Island(void)
       if(Image_hang.center[Image_hang.hang_use]>160)//检验中点正确性
         CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
       else
-        CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+        CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
     }
     else//补线失败，使用之前保存的中心点
     {
-      CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+      CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
 //调试用，显示中心点
       if(LCD_DISPLAY_FLAG==1)
       {
-        LCD_DrawBigPoint(Island.Stay_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
+        LCD_DrawBigPoint(Island.Out_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
       }
     }
   }
@@ -692,13 +698,15 @@ u8 Out_Island(void)
     center_use = ((center_impulse - (center_impulse - 319)*(End_End - Start_Point)*1.0/(End_End - Start_End)) + 0)/2;
     if(center_use<Image_lie.Three_Lie[1]-30)//有效性检验
     {
+      if(center_use < 35)
+        center_use = 35;
       CenterlineToDiff(center_use);
       if(center_Period > (Island_Center_Period_Const - 1))
         center_Period = 0;
     
-      Island.Stay_Center  -= Center_[center_Period];
+      Island.Out_Center  -= Center_[center_Period];
       Center_[center_Period] = center_use;
-      Island.Stay_Center  += Center_[center_Period];
+      Island.Out_Center  += Center_[center_Period];
       center_Period++;  
 //调试用，显示中心点
       if(LCD_DISPLAY_FLAG==1)
@@ -720,15 +728,15 @@ u8 Out_Island(void)
       if(Image_hang.center[Image_hang.hang_use]<160)//检验中点正确性
         CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
       else
-        CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+        CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
     }
     else//补线失败，使用之前保存的中心点
     {
-      CenterlineToDiff(Island.Stay_Center/Island_Center_Period_Const);
+      CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
 //调试用，显示中心点
       if(LCD_DISPLAY_FLAG==1)
       {
-        LCD_DrawBigPoint(Island.Stay_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
+        LCD_DrawBigPoint(Island.Out_Center/Island_Center_Period_Const,Start_Point,Magenta);//行列颠倒
       }
     }
   }
@@ -975,3 +983,5 @@ int Stay2Out_test()
   }
   return Impulse_flag;
 }
+1.Stay_Center改为Out_Center
+2.在Out_Island()中对补线后的中点进行限幅

@@ -349,7 +349,7 @@ void PIT_IRQHandler()
       Island.State = NoIsland;//«Â±Í÷æ
       Island.In_Center = 0;
       Island.In2Stay_cnt = 0;
-      Island.Stay_Center = 0;
+      Island.Out_Center = 0;
       Island.Out_Allow_flag = 0;
       Island.Stay2Out_cnt = 0;
       Island.Next_Island_flag = 0;
