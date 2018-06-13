@@ -911,9 +911,9 @@ int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊýÁÐµÄÖÕµãºÍÄ©Î²ÁÐµÄÖÕµ
 
 int Stay2Out_test()
 {
-  u8 Far_Lie[20];
-  int Diff_Far_Lie[19];//Ò»½×²î·Ö
-  int DDiff_Far_Lie[18];//¶þ½×²î·Ö
+  u8 Far_Lie[30];
+  int Diff_Far_Lie[29];//Ò»½×²î·Ö
+  int DDiff_Far_Lie[28];//¶þ½×²î·Ö
   int Liner_cnt  = 0;
   u8 Impulse_flag = 0;
   
@@ -921,20 +921,20 @@ int Stay2Out_test()
   u8 i;
   if(Island.State==Right_Island_in)
   {
-    for(i=0;i<20;i++)
+    for(i=0;i<30;i++)
     {
-      Temp_point=180;
+      Temp_point=200;
       while(!(Image_Point(Temp_point,30+i*4)==1
             &&Image_Point(Temp_point-1,30+i*4)==1
               &&Image_Point(Temp_point-2,30+i*4)==1)&&Temp_point>=10)
       Temp_point--;
       Far_Lie[i] = Temp_point;
     }
-    for(i=0;i<19;i++)
+    for(i=0;i<29;i++)
     {
       Diff_Far_Lie[i] = Far_Lie[i+1] - Far_Lie[i];
     }
-    for(i=0;i<18;i++)
+    for(i=0;i<28;i++)
     {
       DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
       if(Abs_(DDiff_Far_Lie[i])<3)//ÏßÐÔ±êÖ¾
@@ -948,20 +948,20 @@ int Stay2Out_test()
   }
   else if(Island.State==Left_Island_in)
   {
-    for(i=0;i<20;i++)
+    for(i=0;i<30;i++)
     {
-      Temp_point=180;
+      Temp_point=200;
       while(!(Image_Point(Temp_point,289-i*4)==1
             &&Image_Point(Temp_point-1,289-i*4)==1
               &&Image_Point(Temp_point-2,289-i*4)==1)&&Temp_point>=10)
       Temp_point--;
       Far_Lie[i] = Temp_point;
     }
-    for(i=0;i<19;i++)
+    for(i=0;i<29;i++)
     {
       Diff_Far_Lie[i] = Far_Lie[i+1] - Far_Lie[i];
     }
-    for(i=0;i<18;i++)
+    for(i=0;i<28;i++)
     {
       DDiff_Far_Lie[i] = Diff_Far_Lie[i+1] - Diff_Far_Lie[i];
       if(Abs_(DDiff_Far_Lie[i])<3)//ÏßÐÔ±êÖ¾
