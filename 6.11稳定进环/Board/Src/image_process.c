@@ -58,7 +58,7 @@ void image_process(void)
   Island_process();
 //  Out_Island();
     Slow_Flag=0;
-    if(Island.State!=NoIsland&&Island.State!=Wait_Next)
+    if(Island.State!=NoIsland)
     {
       
     }
@@ -110,8 +110,13 @@ void image_process(void)
       case Right_Island_out:
         LCD_PutString(250,220,"Ro",Red,White);
         break;
-      case Wait_Next:
-        LCD_PutString(250,220,"W",Red,White);
+      case Left_Wait_Next:
+        LCD_PutString(250,220,"LW",Red,White);
+        break;
+      case Right_Wait_Next:
+        LCD_PutString(250,220,"RW",Red,White);
+        break;
+      default:
         break;
       }
     }
@@ -358,6 +363,7 @@ u8 Island_process(void)
   In_Island();//Èë»·µº
   Stay_Island();//ÔÚ»·µºÀï
   Out_Island();//³ö»·µº
+  Wait_Next_Island();//·ÀÖ¹ÔÙ´Î½øÈë»·µº
   return 0;
 }
 
@@ -374,12 +380,22 @@ u8 Elec_Island(void)
     }
   }
   
-  if(Island.State == Left_Island_out
-     ||Island.State == Right_Island_out)
+  if(Island.State == Left_Island_out)
   {
     if(double_AD()==1)
     {
-      Island.State = Wait_Next;//µÈ´ıÏÂÒ»¸ö»·µºµÄÊ±¼ä¼ä¸ô
+      Beep_Once(&Image_Island_Test_Beep);
+      Island.State = Left_Wait_Next;//µÈ´ıÏÂÒ»¸ö»·µºµÄÊ±¼ä¼ä¸ô
+      Island.Next_Island_flag = 1;
+      Island.Next_Island_flag_delay = Island.Next_Island_flag_delay_const;
+    }
+  }
+  else if(Island.State == Right_Island_out)
+  {
+    if(double_AD()==1)
+    {
+      Beep_Once(&Image_Island_Test_Beep);
+      Island.State = Right_Wait_Next;//µÈ´ıÏÂÒ»¸ö»·µºµÄÊ±¼ä¼ä¸ô
       Island.Next_Island_flag = 1;
       Island.Next_Island_flag_delay = Island.Next_Island_flag_delay_const;
     }
@@ -862,7 +878,7 @@ int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊıÁĞµÄÖÕµãºÍÄ©Î²ÁĞµÄÖÕµ
   {
     for(i=0;i<25;i++)
     {
-      Temp_point=220;
+      Temp_point=239;
       while(!(Image_Point(Temp_point,0+i*4)==1
             &&Image_Point(Temp_point-1,0+i*4)==1
               &&Image_Point(Temp_point-2,0+i*4)==1)&&Temp_point>=10)
@@ -889,7 +905,7 @@ int Out_Island_Test(int* start_end, int* end_end)//¿ªÊ¼¼ÆÊıÁĞµÄÖÕµãºÍÄ©Î²ÁĞµÄÖÕµ
   {
     for(i=0;i<25;i++)
     {
-      Temp_point=220;
+      Temp_point=239;
       while(!(Image_Point(Temp_point,319-i*4)==1
             &&Image_Point(Temp_point-1,319-i*4)==1
               &&Image_Point(Temp_point-2,319-i*4)==1)&&Temp_point>=10)
@@ -931,7 +947,7 @@ int Stay2Out_test()
   {
     for(i=0;i<30;i++)
     {
-      Temp_point=200;
+      Temp_point=220;
       while(!(Image_Point(Temp_point,30+i*4)==1
             &&Image_Point(Temp_point-1,30+i*4)==1
               &&Image_Point(Temp_point-2,30+i*4)==1)&&Temp_point>=10)
@@ -958,7 +974,7 @@ int Stay2Out_test()
   {
     for(i=0;i<30;i++)
     {
-      Temp_point=200;
+      Temp_point=220;
       while(!(Image_Point(Temp_point,289-i*4)==1
             &&Image_Point(Temp_point-1,289-i*4)==1
               &&Image_Point(Temp_point-2,289-i*4)==1)&&Temp_point>=10)
@@ -983,5 +999,153 @@ int Stay2Out_test()
   }
   return Impulse_flag;
 }
-1.Stay_Center¸ÄÎªOut_Center
-2.ÔÚOut_Island()ÖĞ¶Ô²¹ÏßºóµÄÖĞµã½øĞĞÏŞ·ù
+
+int Wait_Next_Island()
+{
+  int center;
+  u8 hang_use;
+  if(Island.State!=Left_Wait_Next&&Island.State!=Right_Wait_Next)//²»ÔÚ´Ë×´Ì¬ÏÂ
+    return 1;//Ö±½Ó·µ»Ø
+  
+  center = Wait_Next_center(&hang_use);
+  if(center==-1)//³ö»·µºÊ±Ñ°ÕÒÍ»±äµãÊ§°Ü
+  {
+    get_black_line(Image_fire[Start_Point],Start_Point);//45cm´¦ÖĞĞÄµã
+    if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
+       &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
+         &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//È¥³ı¹â°ßµÄÓ°Ïì
+    {
+      get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
+    }
+    CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+  }
+  else
+  {
+    get_black_line(Image_fire[hang_use],hang_use);
+    CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+  }
+  return 0;
+}
+
+
+int Wait_Next_center(u8* hang)//³ö»·µºÊ±·ÀÖ¹ÔÙ´Î½øÈë»·µº£¬Ñ°ÕÒÍ»±äµã
+{
+  int Middle;
+  int center;
+  int ccd_start=10,ccd_end=310;  //ccdÉ¨ÃèÆğµã10£¬ÖÕµã310   
+  int Left_Count=0,Right_Count=0;//×óÓÒ¼ÆÊıÎª0
+  int Diff_L[19],Diff_R[19];//Ò»½×²î·Ö
+  int DDiff_L[18],DDiff_R[18];//¶ş½×²î·Ö
+  int Liner_L_cnt  = 0,Liner_R_cnt  = 0;
+  u16 Next_black_L[20];
+  u16 Next_black_R[20];
+  u8  Impulse_L_Flag = 0,Impulse_R_Flag = 0;//Ò»½×²î·ÖÖĞ³öÏÖ½×Ô¾
+  u8 i = 0,j = 0;
+  u8 *ImageData_in;
+  
+  Middle = Test_Far_Lie();//´Ó65ĞĞ¿ªÊ¼µ½255ĞĞ
+  if(Island.State == Right_Island_pre)
+  {
+    if(Middle>200)return -1;//Ç°·½Ö±µÀÒÑ¾­¿´²»µ½ÁË
+  }
+  else if(Island.State == Left_Island_pre)
+  {
+    if(Middle<120)return -1;//Ç°·½Ö±µÀÒÑ¾­¿´²»µ½ÁË
+  }
+  
+  for(i=0;i<20;i++)//20ĞĞ
+  {
+    ImageData_in = Image_fire[i*3+Island.Image_Start_hang];
+    for(j=0;j<40;j++)
+      for(u8 k=0;k<8;k++)
+        ImageData[j*8+k] = (ImageData_in[j]>>(7-k))&0x01;
+    if(Island.State == Right_Wait_Next)
+    {
+      Right_Count = Middle;//°ÑºÚÏßÖĞ¼äÖµ¸³¸øÓÒ¼ÆÊıÆğµã
+      while(!(ImageData[Right_Count+3]==1
+              && ImageData[Right_Count+2]==1
+                && ImageData[Right_Count+1]==1)
+            && Right_Count < ccd_end)//Èç¹ûÔÚÓĞĞ§ÇøÄÚÃ»ÓĞÕÒµ½Á¬ĞøÈı¸öºÚµã
+        Right_Count++;//´ÓÖĞ¼äÎ»ÖÃ¿ªÊ¼£¬ÍùÓÒÊı£¬·¢ÏÖÍùÓÒÈıµã¶¼ÊÇºÚµãÍ£
+      if(Right_Count<ccd_end)//Èç¹ûÔÚÓĞĞ§·¶Î§ÄÚ
+      {
+        Next_black_R[i] = Right_Count;
+      }
+      else if(Right_Count<Image_lie.Three_Lie[1]+10)
+      {
+        Next_black_R[i] = ccd_end;
+      }
+      else
+      {
+        Next_black_R[i] = ccd_end;
+      }
+    }
+    else if(Island.State == Left_Wait_Next)
+    {
+      Left_Count = Image_lie.Three_Lie[1];
+      while(!(ImageData[Left_Count-3]==1 
+              && ImageData[Left_Count-2]==1
+                && ImageData[Left_Count-1]==1)
+            && Left_Count > ccd_start)	  
+        Left_Count--;
+      if(Left_Count > ccd_start)
+      {
+        Next_black_L[i] = Left_Count; 
+      }
+      else if(Left_Count>Image_lie.Three_Lie[1]-10)
+      {
+        Next_black_L[i] = ccd_start;
+      }
+      else
+      {
+        Next_black_L[i] = ccd_start;
+      }
+    }
+  }
+  for(i=0;i<19;i++)
+  {
+    if(Island.State == Right_Wait_Next)
+    {
+      Diff_R[i] = Next_black_R[i+1] - Next_black_R[i];
+    }
+    else if(Island.State == Left_Wait_Next)
+    {
+      Diff_L[i] = Next_black_L[i+1] - Next_black_L[i];
+    }
+  }
+  for(i=0;i<18;i++)
+  {
+    if(Island.State == Right_Wait_Next)
+    {
+      DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
+      if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
+      if(DDiff_R[i]<-30&&Liner_R_cnt>i-3&&Liner_R_cnt>1)
+      {
+        Impulse_R_Flag = 1;
+        center = Next_black_R[i];//³öÏÖÌø×ªµÄĞĞ
+        *hang   = i*3+Island.Image_Start_hang;
+        break;
+      }
+    }
+    else if(Island.State == Left_Wait_Next)
+    {
+      DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
+      if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
+      if(DDiff_L[i]> 30&&Liner_L_cnt>i-3&&Liner_L_cnt>1)
+      {
+        Impulse_L_Flag = 1;//³öÏÖ³å¼¤
+        center = Next_black_L[i];//³öÏÖÌø×ªµÄĞĞ
+        *hang   = i*3+Island.Image_Start_hang;
+        break;
+      }
+    }
+  }
+  if(Impulse_R_Flag==0&&Impulse_L_Flag==0)
+  {
+    return -1;//Ã»ÓĞ³öÏÖ
+  }
+  else 
+  {
+    return center;
+  }
+}

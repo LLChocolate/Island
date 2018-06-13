@@ -191,7 +191,8 @@ enum ISLAND_STATE
   Right_Island_in,
   Left_Island_out,
   Right_Island_out,
-  Wait_Next
+  Left_Wait_Next,
+  Right_Wait_Next
 };
 
 
