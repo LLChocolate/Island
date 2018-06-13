@@ -34,8 +34,9 @@ Image_hangData Image_hang;
 Image_lieData  Image_lie={{78,158,238},{0}};
 Island_Data    Island={
                   .Correct_hang = 150,
+                  .Stay_hang_use = 127,//这个行是瞎给的
                   .Image_Start_hang = 83,
-                  .Next_Island_flag_delay_const = 1000,
+                  .Next_Island_flag_delay_const = 2000,
                   .Stay2Out_flag_delay_const = 800
                     };
 void image_process(void)
@@ -347,7 +348,7 @@ u8 Cross_Test(void)
 
 u8 double_AD(void)
 {
-  if((L_AD_Ave>3000)||(R_AD_Ave>3000))
+  if((L_AD_Ave>2400)||(R_AD_Ave>2400))
   {
     return 1;
   }
@@ -384,7 +385,6 @@ u8 Elec_Island(void)
   {
     if(double_AD()==1)
     {
-      Beep_Once(&Image_Island_Test_Beep);
       Island.State = Left_Wait_Next;//等待下一个环岛的时间间隔
       Island.Next_Island_flag = 1;
       Island.Next_Island_flag_delay = Island.Next_Island_flag_delay_const;
@@ -394,7 +394,6 @@ u8 Elec_Island(void)
   {
     if(double_AD()==1)
     {
-      Beep_Once(&Image_Island_Test_Beep);
       Island.State = Right_Wait_Next;//等待下一个环岛的时间间隔
       Island.Next_Island_flag = 1;
       Island.Next_Island_flag_delay = Island.Next_Island_flag_delay_const;
@@ -622,7 +621,7 @@ u8 Stay_Island(void)
     return 1;
   
 //当作普通弯道寻找中线
-  get_black_line(Image_fire[Start_Point],Start_Point);//45cm处中心点
+  get_black_line(Image_fire[Island.Stay_hang_use],Island.Stay_hang_use);//
   if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
      &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
        &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//去除光斑的影响
@@ -637,8 +636,9 @@ u8 Stay_Island(void)
       Island.Stay2Out_cnt ++;
     else 
       Island.Stay2Out_cnt = 0;
-    if(Island.Stay2Out_cnt>2)//连续三次测到突变点状态改变
+    if(Island.Stay2Out_cnt>1)//连续两次测到突变点状态改变
     {
+      Beep_Once(&Image_Island_Test_Beep);
       if(Island.State==Left_Island_in)
         Island.State = Left_Island_out;
       else if(Island.State==Right_Island_in)
@@ -694,7 +694,7 @@ u8 Out_Island(void)
       {
         get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
       }
-      if(Image_hang.center[Image_hang.hang_use]>160)//检验中点正确性
+      if(Image_hang.center[Image_hang.hang_use]>170)//检验中点正确性
         CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
       else
         CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
@@ -741,7 +741,7 @@ u8 Out_Island(void)
       {
         get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
       }
-      if(Image_hang.center[Image_hang.hang_use]<160)//检验中点正确性
+      if(Image_hang.center[Image_hang.hang_use]<150)//检验中点正确性
         CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
       else
         CenterlineToDiff(Island.Out_Center/Island_Center_Period_Const);
@@ -947,7 +947,7 @@ int Stay2Out_test()
   {
     for(i=0;i<30;i++)
     {
-      Temp_point=220;
+      Temp_point=239;
       while(!(Image_Point(Temp_point,30+i*4)==1
             &&Image_Point(Temp_point-1,30+i*4)==1
               &&Image_Point(Temp_point-2,30+i*4)==1)&&Temp_point>=10)
@@ -974,7 +974,7 @@ int Stay2Out_test()
   {
     for(i=0;i<30;i++)
     {
-      Temp_point=220;
+      Temp_point=239;
       while(!(Image_Point(Temp_point,289-i*4)==1
             &&Image_Point(Temp_point-1,289-i*4)==1
               &&Image_Point(Temp_point-2,289-i*4)==1)&&Temp_point>=10)

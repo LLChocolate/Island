@@ -211,6 +211,7 @@ typedef struct
   
   int Out_Center;//用作出环岛的标准
   
+  u8  Stay_hang_use;
   u8  Stay2Out_flag;
   u16 Stay2Out_flag_delay;
   u16 Stay2Out_flag_delay_const;
