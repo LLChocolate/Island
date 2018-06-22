@@ -616,7 +616,6 @@ u8 Stay_Island(void)
       Island.Stay2Out_cnt = 0;
     if(Island.Stay2Out_cnt>1)//连续两次测到突变点状态改变
     {
-      Beep_Once(&Image_Island_Test_Beep);
       if(Island.State==Left_Island_in)
         Island.State = Left_Island_out;
       else if(Island.State==Right_Island_in)
@@ -1142,7 +1141,7 @@ u8 In_Cross_test()//斜入十字检测
 {
   u8 Cross_curve_flag = 0;
   Cross_curve_flag = Cross_curve_test();
-  if(Cross_curve_flag!=1)//不是斜入十字
+  if(Cross_curve_flag==0)//不是斜入十字
   {
     if(Cross_Test()==1)//优先级最低
     Cross.State = Str2Cross;
@@ -1297,13 +1296,13 @@ u8 Cross_curve_test()
       break;
     }
   }
-  if(Impulse_flag==1)//线性且出现冲激
+  if(Impulse_flag==1&&sum_u8(Far_Lie,20)>100)//线性且出现冲激
   {
-    if(sum_s16(Diff_Far_Lie,19)>10)
+    if(sum_s16(Diff_Far_Lie,19)>30)
     {
       Cross.State = L2Cross_True;//进入左斜入十字模式
     }
-    else if(sum_s16(Diff_Far_Lie,19)<-10)
+    else if(sum_s16(Diff_Far_Lie,19)<-30)
     {
       Cross.State = R2Cross_True;//进入右斜入十字模式
     }
@@ -1399,6 +1398,7 @@ u8 Out_Cross_test(void)
   if(edge_cnt>3)
   {
     Cross.State = NoCross;
+    Beep_Once(&Image_Island_Test_Beep);
     return 1;
   }
   else 
