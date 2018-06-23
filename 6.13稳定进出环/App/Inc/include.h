@@ -150,4 +150,6 @@ extern Image_hangData Image_hang;
 extern Image_lieData  Image_lie;
 extern Island_Data    Island;
 extern Beep_Str       Image_Island_Test_Beep;//²âÊÔÉãÏñÍ·»·µº¼à²â
+extern int _1000ms_cnt;
+extern u8 image_run_times;
 #endif  //__INCLUDE_H__

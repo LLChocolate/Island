@@ -327,6 +327,14 @@ void PIT_IRQHandler()
   Time_1ms++; 
   TimeCnt_5ms++;
   TimeCnt_20ms++;
+  _1000ms_cnt++;
+  if(_1000ms_cnt==1000)
+  {
+    _1000ms_cnt = 0;
+    tanzhen = image_run_times;
+    image_run_times = 0;
+  }
+  
   if(Reduct_Flag==1&&Blue_Start_Flag==1)
     TimeCnt_2000ms++;
   if(Key_Start_Flag==1)

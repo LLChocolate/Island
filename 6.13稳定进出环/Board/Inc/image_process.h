@@ -8,7 +8,7 @@
 #define HALF_NEAR           115
 #define VN_HALF             170
 #define Island_HALF         106
-#define Far_Point           72            //1m处  76半宽
+#define Far_Point           85            //1m处  76半宽
 #define Far_Half            80
 #define Start_Point         105         //45cm处
 #define Near_Point          150            //近处

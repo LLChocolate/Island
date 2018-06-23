@@ -95,11 +95,13 @@ u16 stand_AD_R = 0xffff;
 u16 stand_AD   = 0Xffff;
 float Acc_K=1;
 
-u8 DIR1 = 0;
-u8 DIR2 = 0;
 u16 num = 0;
 //******************************************************************
+u8 image_run_times = 0;
 u8 tanzhen = 0;
+
+int _1000ms_cnt = 0;
+
 void main()
 {
   u8 Key;
@@ -159,11 +161,11 @@ while(1)
         LCD_Draw_Line(Image_lie.Three_Lie[2],Image_lie.Three_lie_end[2],Image_lie.Three_Lie[2],160);
 //        LCD_Draw_Line(0,Start_Point,319,Start_Point);
 //        LCD_Draw_Line(0,Image_hang.hang_use,319,Image_hang.hang_use);
-        LCD_Draw_Line(0,120,319,120);
-        LCD_Draw_Line(0,90,319,90);
+        LCD_Draw_Line(0,Far_Point,319,Far_Point);
         LCD_Put_Int(100,100,"",L_AD_Ave,Red,White);
         LCD_Put_Int(100,120,"",R_AD_Ave,Red,White);
       }
+      image_run_times++;
     }
   SCI_Send_Datas(UART1);
   if(Motor_enable_Flag==0)

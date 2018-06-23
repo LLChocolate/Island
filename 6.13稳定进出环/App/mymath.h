@@ -24,5 +24,6 @@ u8 max_u8_index(u8 temp[],u16 num);
 u8 min_u8_index(u8 temp[],u16 num);
 u8 min_int_index(int temp[],u8 num);
 int ave_s16(int temp[],const u16 num);
+float fave_s16(int temp[],const u16 num);
 int _2nd_Diff(int temp[],const u16 num);
 #endif

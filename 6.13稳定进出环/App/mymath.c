@@ -290,6 +290,20 @@ int ave_s16(int temp[],const u16 num)
   return sum/num;
 }
 
+float fave_s16(int temp[],const u16 num)
+{
+  u16 i;
+  int sum = 0;
+  if(num==0)return -1;
+  
+  for(i=0;i<num;i++)
+  {
+    sum += temp[i];
+  }
+  
+  return sum*1.0/num;
+}
+
 int _2nd_Diff(int temp[],const u16 num)
 {
   u16 i;
