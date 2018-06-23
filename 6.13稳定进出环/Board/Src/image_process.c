@@ -1166,11 +1166,11 @@ u8 In_Cross_test()//斜入十字检测
     Cross.State = L2Cross_Pre;
   }
   Cross_curve_flag = Cross_curve_test();
-  if(Cross_curve_flag==0)//不是斜入十字
-  {
-    if(Cross_Test()==1)//优先级最低
-    Cross.State = Str2Cross;
-  }
+//  if(Cross_curve_flag==0)//不是斜入十字
+//  {
+//    if(Cross_Test()==1)//优先级最低
+//    Cross.State = Str2Cross;
+//  }
   return 0;
 }
 
@@ -1288,19 +1288,21 @@ u8 Cross_curve_test()
 {
   int ccd_start=10,ccd_end=310;  //ccd扫描起点10，终点310   
   int Left_Count=0,Right_Count=0;//左右计数为0
-  int L_black[20],R_black[20];//左右边界
-  int Diff_L[19],Diff_R[19];//一阶差分
-  int DDiff_L[18],DDiff_R[18];//二阶差分
+  int L_black[30],R_black[30];//左右边界
+  int Diff_L[29],Diff_R[29];//一阶差分
+  int DDiff_L[28],DDiff_R[28];//二阶差分
   int   Liner_L_cnt  = 0,Liner_R_cnt  = 0;
   u8    Liner_L_flag = 0,Liner_R_flag = 0;
-  u8    Impulse_L_Flag = 0,Impulse_R_Flag = 0;//一阶差分中出现阶跃
-  u8    Impulse_L_index = 0,Impulse_R_index = 0;//阶跃出现的位置
+  u8    Turn_L_Flag = 0,Turn_R_Flag = 0;//出现转折点
+  u8    Turn_L_index= 0,Turn_R_index= 0;//出现转折点的位置
+  int   Turn_L_early_cnt = 0,Turn_R_early_cnt = 0;//出现转折点之前边沿捕获
+  int   Turn_L_late_cnt = 0 ,Turn_R_late_cnt = 0 ;//出现转折点之后边沿捕获
   u8 i = 0,j = 0;
   u8 *ImageData_in;
   
-  for(i=0;i<20;i++)//10行
+  for(i=0;i<30;i++)//10行
   {
-    ImageData_in = Image_fire[Cross.Test_hang-i*2];
+    ImageData_in = Image_fire[Cross.Test_hang-i];
     for(j=0;j<40;j++)
       for(u8 k=0;k<8;k++)
         ImageData[j*8+k] = (ImageData_in[j]>>(7-k))&0x01;
@@ -1341,17 +1343,32 @@ u8 Cross_curve_test()
     }
   }
   if(Cross.State==L2Cross_Pre)
-    for(i=0;i<19;i++)
+    for(i=0;i<29;i++)
     {
       Diff_R[i] = R_black[i+1] - R_black[i];
     }
   else if(Cross.State==R2Cross_Pre)
-    for(i=0;i<19;i++)
+    for(i=0;i<29;i++)
     {
       Diff_L[i] = L_black[i+1] - L_black[i];
+      if(Turn_R_Flag==0&&Diff_L[i]>0)//未出现转折点
+        Turn_R_early_cnt++;
+      else if(Turn_R_Flag==0&&Diff_L[i]<0)//出现转折点
+      {
+        Turn_R_Flag = 1;
+        Turn_R_late_cnt++;
+      }
+      else if(Turn_R_Flag==1&&Diff_L[i]<0)
+      {
+        Turn_R_late_cnt++;
+        if(Turn_R_late_cnt==3)
+        {
+          Turn_R_index - 3;
+        }
+      }
     }
   if(Cross.State==L2Cross_Pre)
-    for(i=0;i<18;i++)
+    for(i=0;i<28;i++)
     {
       DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
       if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
@@ -1362,7 +1379,7 @@ u8 Cross_curve_test()
       }
     }
   else if(Cross.State==R2Cross_Pre)
-    for(i=0;i<18;i++)
+    for(i=0;i<28;i++)
     {
       DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
       if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
@@ -1374,7 +1391,7 @@ u8 Cross_curve_test()
     }
   if(Cross.State==L2Cross_Pre)
   {
-    if(Liner_R_cnt>15)Liner_R_flag = 1;
+    if(Liner_R_cnt>20)Liner_R_flag = 1;
     if(Liner_R_flag
        &&Impulse_R_Flag
        &&Impulse_R_index>6
@@ -1386,7 +1403,7 @@ u8 Cross_curve_test()
   }
   else if(Cross.State==R2Cross_Pre)
   {
-    if(Liner_L_cnt>15)Liner_L_flag = 1;
+    if(Liner_L_cnt>20)Liner_L_flag = 1;
     if(Liner_L_flag
        &&Impulse_L_Flag
        &&Impulse_L_index>6
