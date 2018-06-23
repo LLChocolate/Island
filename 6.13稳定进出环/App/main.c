@@ -167,7 +167,7 @@ while(1)
       }
       image_run_times++;
     }
-  SCI_Send_Datas(UART1);
+//  SCI_Send_Datas(UART1);
   if(Motor_enable_Flag==0)
   {
     Speed_stand = 0;

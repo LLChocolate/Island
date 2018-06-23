@@ -40,7 +40,7 @@ Island_Data    Island={
                   .Stay2Out_flag_delay_const = 800
                     };
 Cross_Data     Cross={
-                  .Test_hang = 120
+                  .Test_hang = 220
                     };
 void image_process(void)
 {
@@ -1135,9 +1135,10 @@ u8 Cross_process(void)
 {
   if(Island.State!=NoIsland)//环岛优先级最高
     return 1;
+  Cross.State = NoCross;//清空状态
   In_Cross_test();//斜入十字检测
   In_Cross();//斜入十字
-  Out_Cross_test();
+//  Out_Cross_test();
   return 0;
 }
 
@@ -1149,7 +1150,6 @@ u8 In_Cross_test()//斜入十字检测
      ||Cross.State==L2Cross_True
      ||Cross.State==Str2Cross)
   return 1;
-  
   
   get_black_line(Image_fire[Start_Point],Start_Point);//先通过get_black_line确定此时中心点的位置
   if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
@@ -1289,9 +1289,9 @@ u8 Cross_curve_test()
 {
   int ccd_start=10,ccd_end=310;  //ccd扫描起点10，终点310   
   int Left_Count=0,Right_Count=0;//左右计数为0
-  int L_black[30],R_black[30];//左右边界
-  int Diff_L[29],Diff_R[29];//一阶差分
-  int DDiff_L[28],DDiff_R[28];//二阶差分
+  int L_black[70],R_black[70];//左右边界
+  int Diff_L[69],Diff_R[69];//一阶差分
+  int DDiff_L[68],DDiff_R[68];//二阶差分
   int   Liner_L_cnt  = 0,Liner_R_cnt  = 0;
   u8    Liner_L_flag = 0,Liner_R_flag = 0;
   u8    Turn_L_Flag = 0,Turn_R_Flag = 0;//出现转折点
@@ -1301,9 +1301,9 @@ u8 Cross_curve_test()
   u8 i = 0,j = 0;
   u8 *ImageData_in;
   
-  for(i=0;i<30;i++)//10行
+  for(i=0;i<70;i++)//10行
   {
-    ImageData_in = Image_fire[Cross.Test_hang-i];
+    ImageData_in = Image_fire[Cross.Test_hang-i*2];
     for(j=0;j<40;j++)
       for(u8 k=0;k<8;k++)
         ImageData[j*8+k] = (ImageData_in[j]>>(7-k))&0x01;
@@ -1345,16 +1345,16 @@ u8 Cross_curve_test()
   }
   if(Cross.State==L2Cross_Pre)
   {
-    for(i=0;i<29;i++)
+    for(i=0;i<69;i++)
     {
       Diff_R[i] = R_black[i+1] - R_black[i];
     }
-    for(i=0;i<29;i++)
+    for(i=0;i<69;i++)
     {
       if(Turn_R_Flag==0&&Diff_R[i]<0)//未出现转折点
         Turn_R_early_cnt++;
       else if(Turn_R_Flag==0
-              &&i<24            //防止内存溢出
+              &&i<64            //防止内存溢出
               &&Diff_R[i]>0
               &&Diff_R[i+1]>0
               &&Diff_R[i+2]>0)//出现转折点
@@ -1372,16 +1372,16 @@ u8 Cross_curve_test()
   }
   else if(Cross.State==R2Cross_Pre)
   {
-    for(i=0;i<29;i++)
+    for(i=0;i<69;i++)
     {
       Diff_L[i] = L_black[i+1] - L_black[i];
     }
-    for(i=0;i<29;i++)
+    for(i=0;i<69;i++)
     {
       if(Turn_L_Flag==0&&Diff_L[i]>0)//未出现转折点
         Turn_L_early_cnt++;
       else if(Turn_L_Flag==0
-              &&i<24            //防止内存溢出
+              &&i<64            //防止内存溢出
               &&Diff_L[i]<0
               &&Diff_L[i+1]<0
               &&Diff_L[i+2]<0)//出现转折点
@@ -1398,7 +1398,7 @@ u8 Cross_curve_test()
   }
   if(Cross.State==L2Cross_Pre)
   {
-    for(i=0;i<28;i++)
+    for(i=0;i<68;i++)
     {
       DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
       if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
@@ -1407,7 +1407,7 @@ u8 Cross_curve_test()
   }
   else if(Cross.State==R2Cross_Pre)
   {
-    for(i=0;i<28;i++)
+    for(i=0;i<68;i++)
     {
       DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
       if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
@@ -1418,12 +1418,12 @@ u8 Cross_curve_test()
   {
     if(Liner_R_flag
        &&Turn_R_Flag
-       &&Turn_R_index>8
+       &&Turn_R_index>5
        &&Turn_R_early_cnt>Turn_R_index*2/3
-       &&Turn_R_index<22
-       &&Turn_R_late_cnt>(30-Turn_R_index)*2/3
+       &&Turn_R_index<65
+       &&Turn_R_late_cnt>(70-Turn_R_index)*2/3
        &&fave_s16(Diff_R,Turn_R_index)<-2
-       &&fave_s16(&Diff_R[Turn_R_index],29-Turn_R_index)>2)
+       &&fave_s16(&Diff_R[Turn_R_index],69-Turn_R_index)>2)
     {
 //      Cross.State = L2Cross_True;
 //      Beep_Once(&Image_Island_Test_Beep);
@@ -1434,12 +1434,12 @@ u8 Cross_curve_test()
   {
     if(Liner_L_flag
        &&Turn_L_Flag
-       &&Turn_L_index>8
+       &&Turn_L_index>5
        &&Turn_L_early_cnt>Turn_L_index*2/3
-       &&Turn_L_index<22
-       &&Turn_L_late_cnt>(30-Turn_L_index)*2/3
+       &&Turn_L_index<65
+       &&Turn_L_late_cnt>(70-Turn_L_index)*2/3
        &&fave_s16(Diff_L,Turn_L_index)>2
-       &&fave_s16(&Diff_L[Turn_L_index],29-Turn_L_index)<-2)
+       &&fave_s16(&Diff_L[Turn_L_index],69-Turn_L_index)<-2)
     {
 //      Cross.State = R2Cross_True;
 //      Beep_Once(&Image_Island_Test_Beep);
