@@ -233,8 +233,10 @@ typedef struct
 enum Cross_STATE
 {
   NoCross,//没有十字
+  R2Cross_Pre, //可能在向右斜入十字
+  L2Cross_Pre, //可能在向左斜入十字
   R2Cross_True,//真的在向右斜入十字
-  L2Cross_True,//真的在向右斜入十字
+  L2Cross_True,//真的在向左斜入十字
   Str2Cross//直入十字
 
 };
@@ -243,6 +245,7 @@ typedef struct
 {
   enum Cross_STATE State;
   int In_center;
+  u8  Test_hang;
 }Cross_Data;
 
 #endif
