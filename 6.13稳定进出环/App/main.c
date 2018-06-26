@@ -159,9 +159,9 @@ while(1)
         LCD_Draw_Line(Image_lie.Three_Lie[0],Image_lie.Three_lie_end[0],Image_lie.Three_Lie[0],160);  
         LCD_Draw_Line(Image_lie.Three_Lie[1],Image_lie.Three_lie_end[1],Image_lie.Three_Lie[1],160);  
         LCD_Draw_Line(Image_lie.Three_Lie[2],Image_lie.Three_lie_end[2],Image_lie.Three_Lie[2],160);
-//        LCD_Draw_Line(0,Start_Point,319,Start_Point);
+        LCD_Draw_Line(0,Island.Image_Start_hang,319,Island.Image_Start_hang);
 //        LCD_Draw_Line(0,Image_hang.hang_use,319,Image_hang.hang_use);
-        LCD_Draw_Line(0,Far_Point,319,Far_Point);
+        LCD_Draw_Line(0,Start_Point,319,Start_Point);
         LCD_Put_Int(100,100,"",L_AD_Ave,Red,White);
         LCD_Put_Int(100,120,"",R_AD_Ave,Red,White);
       }

@@ -44,7 +44,7 @@ void image_process(void);
 u8 get_black_line(unsigned char *ImageData_in,int hang);//²¶×½ºÚÏß 
 u8 CenterlineToDiff(int center);
 void get_three_lie(void);
-u8 Cross_Test(void);
+u8 Str_Cross_Test(void);
 u8 double_AD(void);
 u8 Island_process(void);
 u8 Elec_Island(void);
@@ -65,4 +65,5 @@ u8 Cross_center_test(int* start_end, int* end_end);//ºÍ³ö»·µºÊ±ÕÒÖĞĞÄµãµÄ´úÂëÒ»Ñ
 u8 Cross_curve_test();
 u8 Out_Cross_test(void);
 u8 Cross_pre_test(void);
+u8 Str_Cross(void);
 #endif

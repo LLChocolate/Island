@@ -40,7 +40,7 @@ Island_Data    Island={
                   .Stay2Out_flag_delay_const = 800
                     };
 Cross_Data     Cross={
-                  .Test_hang = 220
+                  .Test_hang = 180
                     };
 void image_process(void)
 {
@@ -54,10 +54,11 @@ void image_process(void)
   else
     road_filter_flag = 0;
 //  Cross_curve_test();
-  Cross_process();
+  Island_process();
+//  Cross_process();
 //  In_Cross_test();
 //  Out_Cross_test();
-  Island_process();
+  
     Slow_Flag=0;
     if(Island.State!=NoIsland)
     {
@@ -313,12 +314,12 @@ u8 CenterlineToDiff(int center)
 }
 
 
-u8 Cross_Test(void)
+u8 Str_Cross_Test(void)
 {
   u8 i,cnt=0;
   for(i=0;i<5;i++)
   {
-    if(sum_point(Image_fire[Start_Point+i],40)<=5)
+    if(sum_point(Image_fire[Start_Point+i*2],40)<=5)
       cnt++;
   }
   if(cnt>3&&Image_lie.Three_lie_end[0]<120&&Image_lie.Three_lie_end[2]<120)//近处没有尖角
@@ -1138,6 +1139,7 @@ u8 Cross_process(void)
   Cross.State = NoCross;//清空状态
   In_Cross_test();//斜入十字检测
   In_Cross();//斜入十字
+  Str_Cross();
 //  Out_Cross_test();
   return 0;
 }
@@ -1384,21 +1386,21 @@ u8 Cross_curve_test()
   }
   if(Cross.State==L2Cross_Pre)
   {
-    for(i=0;i<58;i++)
+    for(i=0;i<Turn_R_index;i++)
     {
       DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
       if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
     }
-    if(Liner_R_cnt>30)Liner_R_flag = 1;
+    if(Liner_R_cnt>Turn_R_index*2/3)Liner_R_flag = 1;
   }
   else if(Cross.State==R2Cross_Pre)
   {
-    for(i=0;i<58;i++)
+    for(i=0;i<Turn_L_index;i++)
     {
       DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
       if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
     }
-    if(Liner_L_cnt>30)Liner_L_flag = 1;
+    if(Liner_L_cnt>Turn_L_index*2/3)Liner_L_flag = 1;
   }
   if(Cross.State==L2Cross_Pre)
   {
@@ -1407,13 +1409,10 @@ u8 Cross_curve_test()
        &&Turn_R_index>5
        &&Turn_R_early_cnt>Turn_R_index*2/3
        &&Turn_R_index<45
-//       &&Turn_R_late_cnt>(70-Turn_R_index)*2/3
-//       &&fave_s16(Diff_R,Turn_R_index)<-2
-//       &&fave_s16(&Diff_R[Turn_R_index],69-Turn_R_index)>2)
          )
     {
       Cross.State = L2Cross_True;
-      Beep_Once(&Image_Island_Test_Beep);
+//      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1424,13 +1423,10 @@ u8 Cross_curve_test()
        &&Turn_L_index>5
        &&Turn_L_early_cnt>Turn_L_index*2/3
        &&Turn_L_index<45
-//       &&Turn_L_late_cnt>(70-Turn_L_index)*2/3
-//       &&fave_s16(Diff_L,Turn_L_index)>2
-//       &&fave_s16(&Diff_L[Turn_L_index],69-Turn_L_index)<-2)
          )
     {
       Cross.State = R2Cross_True;
-      Beep_Once(&Image_Island_Test_Beep);
+//      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1596,33 +1592,34 @@ u8 Cross_pre_test(void)
 {
   u8 Temp_point;
   u8 i;
-  int L_Far_Lie[10],R_Far_Lie[10];
-  int L_Diff_Far_Lie[9],R_Diff_Far_Lie[9];//一阶差分
-  int L_DDiff_Far_Lie[8],R_DDiff_Far_Lie[8];//二阶差分
+  int L_Far_Lie[40],R_Far_Lie[40];
+  int L_Diff_Far_Lie[39],R_Diff_Far_Lie[39];//一阶差分
+  int L_DDiff_Far_Lie[38],R_DDiff_Far_Lie[38];//二阶差分
   int L_Liner_cnt = 0,R_Liner_cnt = 0;
+  u8  Impulse_L_flag = 0,Impulse_R_flag = 0;
   
-  for(i=0;i<10;i++)
+  for(i=0;i<40;i++)
   {
     Temp_point=239;
     while(!(Image_Point(Temp_point,10+i*5)==1
           &&Image_Point(Temp_point-1,10+i*5)==1
-            &&Image_Point(Temp_point-2,10+i*5)==1)&&Temp_point>=100)
+            &&Image_Point(Temp_point-2,10+i*5)==1)&&Temp_point>=130)
     Temp_point--;
     L_Far_Lie[i] = Temp_point;
     
     Temp_point=239;
     while(!(Image_Point(Temp_point,310-i*5)==1
           &&Image_Point(Temp_point-1,310-i*5)==1
-            &&Image_Point(Temp_point-2,310-i*5)==1)&&Temp_point>=100)
+            &&Image_Point(Temp_point-2,310-i*5)==1)&&Temp_point>=130)
     Temp_point--;
     R_Far_Lie[i] = Temp_point;
   }
-  for(i=0;i<9;i++)
+  for(i=0;i<39;i++)
   {
     L_Diff_Far_Lie[i] = L_Far_Lie[i+1] - L_Far_Lie[i];
     R_Diff_Far_Lie[i] = R_Far_Lie[i+1] - R_Far_Lie[i];
   }
-  for(i=0;i<8;i++)
+  for(i=0;i<38;i++)
   {
     L_DDiff_Far_Lie[i] = L_Diff_Far_Lie[i+1] - L_Diff_Far_Lie[i];
     R_DDiff_Far_Lie[i] = R_Diff_Far_Lie[i+1] - R_Diff_Far_Lie[i];
@@ -1630,14 +1627,40 @@ u8 Cross_pre_test(void)
       L_Liner_cnt++;
     if(Abs_(R_DDiff_Far_Lie[i])<3&&Abs_(R_Diff_Far_Lie[i])>0)//线性标志
       R_Liner_cnt++;
+    if(L_DDiff_Far_Lie[i]<-30&&L_Liner_cnt>i-2&&L_Liner_cnt>1)
+    {
+      Impulse_L_flag = 1;
+      break;
+    }
+    if(R_DDiff_Far_Lie[i]<-30&&R_Liner_cnt>i-2&&R_Liner_cnt>1)
+    {
+      Impulse_R_flag = 1;
+      break;
+    }
   }
-  if(L_Liner_cnt>4&&R_Liner_cnt>4)
-  {
-    return 1;
-  }
-  else if(L_Liner_cnt>4)
+  if(Impulse_L_flag==1)
     Cross.State = R2Cross_Pre;
-  else if(R_Liner_cnt>4)
+  else if(Impulse_R_flag==1)
     Cross.State = L2Cross_Pre;
   return 0;
+}
+
+u8 Str_Cross(void)
+{
+  int center_temp;
+  if(Cross.State==L2Cross_True||Cross.State==R2Cross_True)
+    return 1;
+  if(Str_Cross_Test()==1)//直入十字
+  {
+    center_temp = Test_Far_Lie();
+    Image_hang.center[Start_Point] = center_temp;
+    get_black_line(Image_fire[Start_Point],Start_Point);//45cm处中心点
+    if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
+       &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
+         &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//去除光斑的影响
+    {
+      get_black_line(Image_fire[Image_lie.Three_lie_end[1]+3],Image_lie.Three_lie_end[1]+3);
+    }
+    CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
+  }
 }
