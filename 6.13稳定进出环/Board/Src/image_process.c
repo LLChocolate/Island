@@ -1,11 +1,3 @@
-////环岛判断：1.前方直道
-////          2.半宽异常（判断环岛左右后锁定）
-////          3.判断不为直道后判断进入环岛时前方碰到的角度的形状
-////          4.出环岛时判断前方竖直三线（三线尽头的位置连续跳变三次）
-////          5.跳变结束后DElay 200ms后解除环岛锁定
-//
-//
-//
 #include "image_process.h"
 #include "include.h"
 #include "stdlib.h"
@@ -53,22 +45,13 @@ void image_process(void)
     road_filter_flag = 1;
   else
     road_filter_flag = 0;
-  Cross_curve_test();
   Island_process();
 //  Cross_process();
-//  In_Cross_test();
-//  Out_Cross_test();
-  
     Slow_Flag=0;
     if(Island.State!=NoIsland)
     {
       
     }
-//    else if(==Cross)
-//    {
-//      get_black_line(Image_fire[Far_Point],Far_Point);//75cm处中心点
-//      CenterlineToDiff(Image_hang.center[Image_hang.hang_use]);
-//    }
     else
     {
       Slow_Flag=1;
@@ -530,7 +513,7 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
     }
     else if(Island.State == Left_Island_pre)
     {
-      Left_Count = Image_lie.Three_Lie[1];
+      Left_Count = Middle;
       while(!(ImageData[Left_Count-3]==1 
               && ImageData[Left_Count-2]==1
                 && ImageData[Left_Count-1]==1)
@@ -567,7 +550,7 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
     {
       DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
       if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
-      if(DDiff_R[i]<-30&&Liner_R_cnt>i-3&&Liner_R_cnt>1)
+      if(DDiff_R[i]<-30&&Liner_R_cnt>i/2&&Liner_R_cnt>1)
       {
         Impulse_R_Flag = 1;
         center = In_black_R[i];//出现跳转的行
@@ -579,7 +562,7 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
     {
       DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
       if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
-      if(DDiff_L[i]> 30&&Liner_L_cnt>i-3&&Liner_L_cnt>1)
+      if(DDiff_L[i]> 30&&Liner_L_cnt>i/2&&Liner_L_cnt>1)
       {
         Impulse_L_Flag = 1;//出现冲激
         center = In_black_L[i];//出现跳转的行
@@ -827,7 +810,6 @@ u8 Image_Island_Test(void)//捕捉黑线
   else 
     return 0;
 }
-
 
 int Test_Far_Lie(void)//在入环岛时找最远点所在的列，从此列开始向两边寻找突变点
 {
@@ -1140,7 +1122,6 @@ u8 Cross_process(void)
   In_Cross_test();//斜入十字检测
   In_Cross();//斜入十字
   Str_Cross();
-//  Out_Cross_test();
   return 0;
 }
 
