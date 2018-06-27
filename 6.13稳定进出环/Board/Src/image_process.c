@@ -53,7 +53,7 @@ void image_process(void)
     road_filter_flag = 1;
   else
     road_filter_flag = 0;
-//  Cross_curve_test();
+  Cross_curve_test();
   Island_process();
 //  Cross_process();
 //  In_Cross_test();
@@ -1592,34 +1592,33 @@ u8 Cross_pre_test(void)
 {
   u8 Temp_point;
   u8 i;
-  int L_Far_Lie[40],R_Far_Lie[40];
-  int L_Diff_Far_Lie[39],R_Diff_Far_Lie[39];//一阶差分
-  int L_DDiff_Far_Lie[38],R_DDiff_Far_Lie[38];//二阶差分
+  int L_Far_Lie[10],R_Far_Lie[10];
+  int L_Diff_Far_Lie[9],R_Diff_Far_Lie[9];//一阶差分
+  int L_DDiff_Far_Lie[8],R_DDiff_Far_Lie[8];//二阶差分
   int L_Liner_cnt = 0,R_Liner_cnt = 0;
-  u8  Impulse_L_flag = 0,Impulse_R_flag = 0;
   
-  for(i=0;i<40;i++)
+  for(i=0;i<10;i++)
   {
     Temp_point=239;
     while(!(Image_Point(Temp_point,10+i*5)==1
           &&Image_Point(Temp_point-1,10+i*5)==1
-            &&Image_Point(Temp_point-2,10+i*5)==1)&&Temp_point>=130)
+            &&Image_Point(Temp_point-2,10+i*5)==1)&&Temp_point>=100)
     Temp_point--;
     L_Far_Lie[i] = Temp_point;
     
     Temp_point=239;
     while(!(Image_Point(Temp_point,310-i*5)==1
           &&Image_Point(Temp_point-1,310-i*5)==1
-            &&Image_Point(Temp_point-2,310-i*5)==1)&&Temp_point>=130)
+            &&Image_Point(Temp_point-2,310-i*5)==1)&&Temp_point>=100)
     Temp_point--;
     R_Far_Lie[i] = Temp_point;
   }
-  for(i=0;i<39;i++)
+  for(i=0;i<9;i++)
   {
     L_Diff_Far_Lie[i] = L_Far_Lie[i+1] - L_Far_Lie[i];
     R_Diff_Far_Lie[i] = R_Far_Lie[i+1] - R_Far_Lie[i];
   }
-  for(i=0;i<38;i++)
+  for(i=0;i<8;i++)
   {
     L_DDiff_Far_Lie[i] = L_Diff_Far_Lie[i+1] - L_Diff_Far_Lie[i];
     R_DDiff_Far_Lie[i] = R_Diff_Far_Lie[i+1] - R_Diff_Far_Lie[i];
@@ -1627,20 +1626,14 @@ u8 Cross_pre_test(void)
       L_Liner_cnt++;
     if(Abs_(R_DDiff_Far_Lie[i])<3&&Abs_(R_Diff_Far_Lie[i])>0)//线性标志
       R_Liner_cnt++;
-    if(L_DDiff_Far_Lie[i]<-30&&L_Liner_cnt>i-2&&L_Liner_cnt>1)
-    {
-      Impulse_L_flag = 1;
-      break;
-    }
-    if(R_DDiff_Far_Lie[i]<-30&&R_Liner_cnt>i-2&&R_Liner_cnt>1)
-    {
-      Impulse_R_flag = 1;
-      break;
-    }
   }
-  if(Impulse_L_flag==1)
+  if(L_Liner_cnt>4&&R_Liner_cnt>4)
+  {
+    return 1;
+  }
+  else if(L_Liner_cnt>4)
     Cross.State = R2Cross_Pre;
-  else if(Impulse_R_flag==1)
+  else if(R_Liner_cnt>4)
     Cross.State = L2Cross_Pre;
   return 0;
 }
