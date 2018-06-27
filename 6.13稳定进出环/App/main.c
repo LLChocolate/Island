@@ -111,24 +111,9 @@ void main()
   Motor2_PID.target=Speed_goal2;
   Duty_Motor1=32767;
   Duty_Motor2=32767;
-//  while(1)
-//  {
-//    Speed_goal1 = 30;
-//    Speed_goal2 = 30;
-////    MOTOR1_DIR=1;
-////    tpm_pwm_duty(MOTOR_1,Duty_Motor1);
-////    MOTOR2_DIR=1;
-////    tpm_pwm_duty(MOTOR_2,Duty_Motor2);
-//    SCI_Send_Datas(UART1);
-//  }
+
 while(1)
 {
-//  Motor1_PID.P=P_TEMP1;
-//  Motor1_PID.I=I_TEMP1;
-//  Motor1_PID.D=D_TEMP1;
-//  Motor2_PID.P=P_TEMP2;
-//  Motor2_PID.I=I_TEMP2;
-//  Motor2_PID.D=D_TEMP2;
 
 //摄像头采集一次
 //图像处理 

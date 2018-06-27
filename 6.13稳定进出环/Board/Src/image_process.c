@@ -13,7 +13,7 @@ u8  Start_line_flag  = 0;
 u8  Start_line_cnt   = 0;
 
 u8  road_filter_flag = 0;
-Filter_1st_Str Center_Filter = {0.5,{0,0},{0,0}};
+Filter_1st_Str Center_Filter = {0.8,{0,0},{0,0}};
 //Kalman_Date Center_Filter={0,0,0,0,0,0.1,40,0,0};
 s16 fangcha_test[200]={0};
 
@@ -27,7 +27,7 @@ Image_lieData  Image_lie={{78,158,238},{0}};
 Island_Data    Island={
                   .Correct_hang = 150,
                   .Stay_hang_use = 127,//这个行是瞎给的
-                  .Image_Start_hang = 83,
+                  .Image_Start_hang = 86,
                   .Next_Island_flag_delay_const = 2000,
                   .Stay2Out_flag_delay_const = 800
                     };
@@ -274,24 +274,18 @@ void get_three_lie(void)
 
 u8 CenterlineToDiff(int center)
 {
-  static u8  center_period = 0;
-  static u16 center_old[Center_Filter_Period];
-  static u16 center_ave = 0;
+  int real_center;
   if(diff_done_flag == 1)return 0;
   
 
 //*********************对中心点均值滤波*************************************  
-
-//  if(center_period > (Center_Filter_Period - 1))
-//  center_period = 0;
-//  
-//  center_ave -= center_old[center_period];
-//  center_old[center_period] = center;
-//  center_ave += center_old[center_period];
-//  center_period++;  
   
+  real_center = filter_1st(center,&Center_Filter);
   diff_done_flag = 1;
-  Diff_error = 160 - center;
+  if(Island.State==Left_Island_pre||Island.State==Right_Island_pre)
+    Diff_error = 160 - real_center;
+  else
+    Diff_error = 160 - center;
   
   return 0;
 }
@@ -315,7 +309,7 @@ u8 Str_Cross_Test(void)
 
 u8 double_AD(void)
 {
-  if((L_AD_Ave>2400)||(R_AD_Ave>2400))
+  if((L_AD_Ave>3000)||(R_AD_Ave>2400))
   {
     return 1;
   }
@@ -385,6 +379,7 @@ u8 In_Island(void)
       CenterlineToDiff(Island.In_Center);//使用上一次的旧值
       if(Island.In2Stay_cnt>=10)//连续10次寻找失败，认为进入环岛，更新状态
       {
+        Beep_Once(&Image_Island_Test_Beep);
         if(Island.State==Left_Island_pre)
         {
           Island.State = Left_Island_in;
@@ -418,7 +413,10 @@ u8 In_Island(void)
         else
         {
           Island.In2Stay_cnt = 0;//清零
-          center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 30;//布线（三角形相似）
+          if(Impulse_hang<95)
+            center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 50;//布线（三角形相似）
+          else
+            center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 30;//布线（三角形相似）
           if(center_use<35)
             center_use = 35;
         }
@@ -466,8 +464,6 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
   int ccd_start=10,ccd_end=310;  //ccd扫描起点10，终点310   
   int Left_Count=0,Right_Count=0;//左右计数为0
   int Diff_L[19],Diff_R[19];//一阶差分
-  int DDiff_L[18],DDiff_R[18];//二阶差分
-  int Liner_L_cnt  = 0,Liner_R_cnt  = 0;
   u16 In_black_L[20];
   u16 In_black_R[20];
   u8  Impulse_L_Flag = 0,Impulse_R_Flag = 0;//一阶差分中出现阶跃
@@ -533,24 +529,13 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
       }
     }
   }
-  for(i=0;i<19;i++)
+  
+  if(Island.State == Right_Island_pre)
   {
-    if(Island.State == Right_Island_pre)
+    for(i=0;i<19;i++)
     {
       Diff_R[i] = In_black_R[i+1] - In_black_R[i];
-    }
-    else if(Island.State == Left_Island_pre)
-    {
-      Diff_L[i] = In_black_L[i+1] - In_black_L[i];
-    }
-  }
-  for(i=0;i<18;i++)
-  {
-    if(Island.State == Right_Island_pre)
-    {
-      DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
-      if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
-      if(DDiff_R[i]<-30&&Liner_R_cnt>i/2&&Liner_R_cnt>1)
+      if(Diff_R[i]>30)
       {
         Impulse_R_Flag = 1;
         center = In_black_R[i];//出现跳转的行
@@ -558,11 +543,13 @@ int In_Island_center(u8* hang)//入环岛时寻找突变点+补线
         break;
       }
     }
-    else if(Island.State == Left_Island_pre)
+  }
+  else if(Island.State == Left_Island_pre)
+  {
+    for(i=0;i<19;i++)
     {
-      DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
-      if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
-      if(DDiff_L[i]> 30&&Liner_L_cnt>i/2&&Liner_L_cnt>1)
+      Diff_L[i] = In_black_L[i+1] - In_black_L[i];
+      if(Diff_L[i]<-30)
       {
         Impulse_L_Flag = 1;//出现冲激
         center = In_black_L[i];//出现跳转的行
@@ -789,19 +776,27 @@ u8 Image_Island_Test(void)//捕捉黑线
   {
     DDiff_L[i] = Diff_L[i+1] - Diff_L[i];
     DDiff_R[i] = Diff_R[i+1] - Diff_R[i];
-    if(Abs_(DDiff_L[i])<3)Liner_L_cnt++;
-    if(Abs_(DDiff_R[i])<3)Liner_R_cnt++;
-    if(DDiff_L[i]<-30&&Liner_L_cnt>i-2&&Liner_L_cnt>1)
+    if(Abs_(DDiff_L[i])<3&&Abs_(Diff_L[i])>0)
+      Liner_L_cnt++;
+    if(Abs_(DDiff_R[i])<3&&Abs_(Diff_R[i])>0)
+      Liner_R_cnt++;
+    if(DDiff_L[i]<-30
+       &&Island.black_L[i]>70
+       &&Liner_L_cnt>i-3
+       &&Liner_L_cnt>0)
     {
       Impulse_L_Flag=1;//出现冲激
     }
-    if(DDiff_R[i]>30&&Liner_R_cnt>i-2&&Liner_R_cnt>1)
+    if(DDiff_R[i]>30
+       &&Island.black_R[i]<249
+       &&Liner_R_cnt>i-3
+       &&Liner_R_cnt>0)
     {
       Impulse_R_Flag=1;
     }
   }
-  if(Liner_L_cnt>6)Liner_L_flag = 1;
-  if(Liner_R_cnt>6)Liner_R_flag = 1;
+  if(Liner_L_cnt>5)Liner_L_flag = 1;
+  if(Liner_R_cnt>5)Liner_R_flag = 1;
   
   if(Liner_L_flag&&Impulse_R_Flag==1)
     return Right_Island_pre;
@@ -1267,6 +1262,8 @@ u8 Cross_curve_test()
   u8    Turn_L_index= 0,Turn_R_index= 0;//出现转折点的位置
   int   Turn_L_early_cnt = 0,Turn_R_early_cnt = 0;//出现转折点之前边沿捕获
   int   Turn_L_late_cnt = 0 ,Turn_R_late_cnt = 0 ;//出现转折点之后边沿捕获
+  u8  Impulse_L_Flag = 0,Impulse_R_Flag = 0;//一阶差分中出现阶跃
+  int Impulse_L_index = 0,Impulse_R_index = 0;//一阶差分出现阶跃的位置
   u8 i = 0,j = 0;
   u8 *ImageData_in;
   
@@ -1279,13 +1276,13 @@ u8 Cross_curve_test()
     
     if(Cross.State==L2Cross_Pre)//左转找右边界
     {
-      Right_Count = 319;
-      while(!(ImageData[Right_Count-3]==0 
-              && ImageData[Right_Count-2]==0
-                && ImageData[Right_Count-1]==0)
-            && Right_Count > ccd_start)//如果在有效区内没有找到连续三个黑点
-        Right_Count--;//从中间位置开始，往右数，发现往右三点都是黑点停
-      if(Right_Count>ccd_start)//如果在有效范围内
+      Right_Count = 35;
+      while(!(ImageData[Right_Count+3]==1
+              && ImageData[Right_Count+2]==1
+                && ImageData[Right_Count+1]==1)
+            && Right_Count < ccd_end)//如果在有效区内没有找到连续三个黑点
+        Right_Count++;//从中间位置开始，往右数，发现往右三点都是黑点停
+      if(Right_Count< ccd_end)//如果在有效范围内
       {
         R_black[i] = Right_Count;
       }
@@ -1297,12 +1294,12 @@ u8 Cross_curve_test()
     else if(Cross.State==R2Cross_Pre)//左转找右边界
     {
       Left_Count = 0;
-      while(!(ImageData[Left_Count+3]==0 
-              && ImageData[Left_Count+2]==0
-                && ImageData[Left_Count+1]==0)
-            && Left_Count < ccd_end)	  
-        Left_Count++;
-      if(Left_Count < ccd_end)
+      while(!(ImageData[Left_Count-3]==1
+              && ImageData[Left_Count-2]==1
+                && ImageData[Left_Count-1]==1)
+            && Left_Count > ccd_start)	  
+        Left_Count--;
+      if(Left_Count > ccd_start)
       {
         L_black[i] = Left_Count; 
       }
@@ -1317,6 +1314,11 @@ u8 Cross_curve_test()
     for(i=0;i<59;i++)
     {
       Diff_R[i] = R_black[i+1] - R_black[i];
+      if(Diff_R[i]<-100)
+      {
+        Impulse_R_Flag = 1;
+        Impulse_R_index = i;
+      }
     }
     for(i=0;i<59;i++)
     {
@@ -1344,6 +1346,11 @@ u8 Cross_curve_test()
     for(i=0;i<59;i++)
     {
       Diff_L[i] = L_black[i+1] - L_black[i];
+      if(Diff_L[i]>100)
+      {
+        Impulse_L_Flag = 1;
+        Impulse_L_index = i;
+      }
     }
     for(i=0;i<59;i++)
     {
@@ -1390,11 +1397,12 @@ u8 Cross_curve_test()
        &&Turn_R_index>5
        &&Turn_R_early_cnt>Turn_R_index*2/3
        &&Turn_R_index<45
-       &&Turn_R_late_cnt>(59-Turn_R_index)/2
+       &&Impulse_R_Flag
+       &&Turn_R_late_cnt>(Impulse_R_index-Turn_R_index)*2/3
          )
     {
       Cross.State = L2Cross_True;
-      Beep_Once(&Image_Island_Test_Beep);
+//      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1405,11 +1413,12 @@ u8 Cross_curve_test()
        &&Turn_L_index>5
        &&Turn_L_early_cnt>Turn_L_index*2/3
        &&Turn_L_index<45
-       &&Turn_L_late_cnt>(59-Turn_L_index)/2
+       &&Impulse_L_Flag
+       &&Turn_L_late_cnt>(Impulse_L_index-Turn_L_index)*2/3
          )
     {
       Cross.State = R2Cross_True;
-      Beep_Once(&Image_Island_Test_Beep);
+//      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1583,16 +1592,16 @@ u8 Cross_pre_test(void)
   for(i=0;i<10;i++)
   {
     Temp_point=239;
-    while(!(Image_Point(Temp_point,10+i*5)==1
-          &&Image_Point(Temp_point-1,10+i*5)==1
-            &&Image_Point(Temp_point-2,10+i*5)==1)&&Temp_point>=100)
+    while(!(Image_Point(Temp_point,0+i*3)==1
+          &&Image_Point(Temp_point-1,0+i*3)==1
+            &&Image_Point(Temp_point-2,0+i*3)==1)&&Temp_point>=130)
     Temp_point--;
     L_Far_Lie[i] = Temp_point;
     
     Temp_point=239;
-    while(!(Image_Point(Temp_point,310-i*5)==1
-          &&Image_Point(Temp_point-1,310-i*5)==1
-            &&Image_Point(Temp_point-2,310-i*5)==1)&&Temp_point>=100)
+    while(!(Image_Point(Temp_point,319-i*3)==1
+          &&Image_Point(Temp_point-1,319-i*3)==1
+            &&Image_Point(Temp_point-2,319-i*3)==1)&&Temp_point>=130)
     Temp_point--;
     R_Far_Lie[i] = Temp_point;
   }
