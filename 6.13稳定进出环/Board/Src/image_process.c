@@ -46,7 +46,7 @@ void image_process(void)
   else
     road_filter_flag = 0;
   Island_process();
-//  Cross_process();
+  Cross_process();
     Slow_Flag=0;
     if(Island.State!=NoIsland)
     {
@@ -418,7 +418,7 @@ u8 In_Island(void)
         else
         {
           Island.In2Stay_cnt = 0;//清零
-          center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 10;//布线（三角形相似）
+          center_use = ((center - (center - 319)*(Impulse_hang - Start_Point)*1.0/(Impulse_hang - Island.Correct_hang)) + 0)/2 + 30;//布线（三角形相似）
           if(center_use<35)
             center_use = 35;
         }
@@ -1279,13 +1279,13 @@ u8 Cross_curve_test()
     
     if(Cross.State==L2Cross_Pre)//左转找右边界
     {
-      Right_Count = 35;
-      while(!(ImageData[Right_Count+3]==1 
-              && ImageData[Right_Count+2]==1
-                && ImageData[Right_Count+1]==1)
-            && Right_Count < ccd_end)//如果在有效区内没有找到连续三个黑点
-        Right_Count++;//从中间位置开始，往右数，发现往右三点都是黑点停
-      if(Right_Count<ccd_end)//如果在有效范围内
+      Right_Count = 319;
+      while(!(ImageData[Right_Count-3]==0 
+              && ImageData[Right_Count-2]==0
+                && ImageData[Right_Count-1]==0)
+            && Right_Count > ccd_start)//如果在有效区内没有找到连续三个黑点
+        Right_Count--;//从中间位置开始，往右数，发现往右三点都是黑点停
+      if(Right_Count>ccd_start)//如果在有效范围内
       {
         R_black[i] = Right_Count;
       }
@@ -1296,13 +1296,13 @@ u8 Cross_curve_test()
     }
     else if(Cross.State==R2Cross_Pre)//左转找右边界
     {
-      Left_Count = 285;
-      while(!(ImageData[Left_Count-3]==1 
-              && ImageData[Left_Count-2]==1
-                && ImageData[Left_Count-1]==1)
-            && Left_Count > ccd_start)	  
-        Left_Count--;
-      if(Left_Count > ccd_start)
+      Left_Count = 0;
+      while(!(ImageData[Left_Count+3]==0 
+              && ImageData[Left_Count+2]==0
+                && ImageData[Left_Count+1]==0)
+            && Left_Count < ccd_end)	  
+        Left_Count++;
+      if(Left_Count < ccd_end)
       {
         L_black[i] = Left_Count; 
       }
@@ -1390,10 +1390,11 @@ u8 Cross_curve_test()
        &&Turn_R_index>5
        &&Turn_R_early_cnt>Turn_R_index*2/3
        &&Turn_R_index<45
+       &&Turn_R_late_cnt>(59-Turn_R_index)/2
          )
     {
       Cross.State = L2Cross_True;
-//      Beep_Once(&Image_Island_Test_Beep);
+      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1404,10 +1405,11 @@ u8 Cross_curve_test()
        &&Turn_L_index>5
        &&Turn_L_early_cnt>Turn_L_index*2/3
        &&Turn_L_index<45
+       &&Turn_L_late_cnt>(59-Turn_L_index)/2
          )
     {
       Cross.State = R2Cross_True;
-//      Beep_Once(&Image_Island_Test_Beep);
+      Beep_Once(&Image_Island_Test_Beep);
       return 1;
     }
   }
@@ -1618,6 +1620,8 @@ u8 Cross_pre_test(void)
     Cross.State = L2Cross_Pre;
   return 0;
 }
+
+
 
 u8 Str_Cross(void)
 {
