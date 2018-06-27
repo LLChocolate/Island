@@ -299,7 +299,7 @@ u8 Str_Cross_Test(void)
     if(sum_point(Image_fire[Start_Point+i*2],40)<=5)
       cnt++;
   }
-  if(cnt>3&&Image_lie.Three_lie_end[0]<120&&Image_lie.Three_lie_end[2]<120)//近处没有尖角
+  if(cnt>3&&(Image_lie.Three_lie_end[0]<120||Image_lie.Three_lie_end[2]<120))//近处没有尖角
   {
     return 1;
   }
@@ -379,7 +379,6 @@ u8 In_Island(void)
       CenterlineToDiff(Island.In_Center);//使用上一次的旧值
       if(Island.In2Stay_cnt>=10)//连续10次寻找失败，认为进入环岛，更新状态
       {
-        Beep_Once(&Image_Island_Test_Beep);
         if(Island.State==Left_Island_pre)
         {
           Island.State = Left_Island_in;
@@ -1293,7 +1292,7 @@ u8 Cross_curve_test()
     }
     else if(Cross.State==R2Cross_Pre)//左转找右边界
     {
-      Left_Count = 0;
+      Left_Count = 285;
       while(!(ImageData[Left_Count-3]==1
               && ImageData[Left_Count-2]==1
                 && ImageData[Left_Count-1]==1)
@@ -1639,9 +1638,10 @@ u8 Str_Cross(void)
     return 1;
   if(Str_Cross_Test()==1)//直入十字
   {
+    Beep_Once(&Image_Island_Test_Beep);
     center_temp = Test_Far_Lie();
-    Image_hang.center[Start_Point] = center_temp;
-    get_black_line(Image_fire[Start_Point],Start_Point);//45cm处中心点
+    Image_hang.center[Far_Point] = center_temp;
+    get_black_line(Image_fire[Far_Point],Far_Point);//45cm处中心点
     if(Image_lie.Three_lie_end[0]>Image_hang.hang_use+5
        &&Image_lie.Three_lie_end[1]>Image_hang.hang_use+5
          &&Image_lie.Three_lie_end[2]>Image_hang.hang_use+5)//去除光斑的影响
